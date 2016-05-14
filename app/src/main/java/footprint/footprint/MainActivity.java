@@ -200,19 +200,18 @@ public class MainActivity extends AppCompatActivity {
         articleMap.getUiSettings().setMyLocationButtonEnabled(false);
         articleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
 
-
             @Override
             public boolean onMarkerClick(Marker marker) {
-                if(mainMarkerPosition != marker.getPosition()) {
-                    try {
-                        articleData = new HttpGetArticleTask().execute(lbrsHash.get(marker)).get();
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                try {
+                    Log.d("LBRS_HASH",lbrsHash.get(marker));
+                    articleData = new HttpGetArticleTask().execute(lbrsHash.get(marker)).get();
 
-                    viewArticle(articleData);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+                viewArticle(articleData);
+
                 return true;
             }
 
@@ -721,14 +720,18 @@ public class MainActivity extends AppCompatActivity {
         options.inSampleSize = 4;
 
         if(values.filename != null) {
-            imageFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
-                    "/DCIM/Camera/",values.filename);
+            String filePath = Environment.getExternalStorageDirectory()+"/DCIM/Camera/" + values.filename;
+            imageFile = new File(filePath);
 
             //이미지 데이터를 비트맵으로 받아온다.
             Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
             //화면에 뿌리기
             articleImageButton.setImageBitmap(bitmap);
         }
+
+
+        dbSelectMarker(values);
+
 
     }
 
@@ -750,6 +753,10 @@ public class MainActivity extends AppCompatActivity {
         datetime = datetime.replaceFirst(":","-");
         datetime = datetime.replaceFirst(":", "-");
 
+        String txtChecker = inputText.getText().toString();
+        if(txtChecker.replace(" ", "").equals("")) {
+            inputText.setText("내용없음");
+        }
 
         ArticleData values = new ArticleData();
 
@@ -788,6 +795,7 @@ public class MainActivity extends AppCompatActivity {
                 values.filename,
                 String.valueOf(values.latitude),
                 String.valueOf(values.longitude));
+
 
 
     }
@@ -834,6 +842,40 @@ public class MainActivity extends AppCompatActivity {
         MarkerOptions mOptions = new MarkerOptions().position(new LatLng(values.latitude, values.longitude));
         articleMap.addMarker(mOptions);
         */
+
+
+        viewArticle(values);
+
+
+    }
+
+    public static void dbSelectMarkerByDate (Date date) {
+
+
+       SQLiteDatabase db = helper.getReadableDatabase();
+
+        String sql = "SELECT footprint.* FROM footprint WHERE date = \'" +dateFrame(date) + "\';";
+
+        Cursor result = db.rawQuery(sql, null);
+        if(result.getCount() > 0) {
+
+            if (result.moveToFirst()) {
+                do {
+                    markerIdHash.put(map.addMarker(new MarkerOptions().position(
+                                    new LatLng(result.getDouble(DB_LATITUDE), result.getDouble(DB_LONGITUDE)))),
+                            String.valueOf(result.getInt(DB_ID)));
+                } while (result.moveToNext());
+            }
+        }
+        result.close();
+        db.close();
+
+    }
+
+    public void dbSelectMarker (ArticleData values) {
+
+        lbrsHash.clear();
+        articleMap.clear();
         try {
             lbrsList = new HttpLBRSTask().execute(String.valueOf(values.latitude), String.valueOf(values.longitude)).get();
 
@@ -856,56 +898,7 @@ public class MainActivity extends AppCompatActivity {
             articleMap.addMarker(mOptions);
         }
 
-        viewArticle(values);
-
-
-    }
-
-    public static void dbSelectMarkerByDate (Date date) {
-
-
-       SQLiteDatabase db = helper.getReadableDatabase();
-
-        String sql = "SELECT footprint.* FROM footprint WHERE date = \'" +dateFrame(date) + "\';";
-
-        Cursor result = db.rawQuery(sql, null);
-
-
-        if(result.moveToFirst()) {
-            do {
-                    markerIdHash.put(map.addMarker(new MarkerOptions().position(
-                                    new LatLng(result.getDouble(DB_LATITUDE), result.getDouble(DB_LONGITUDE)))),
-                            String.valueOf(result.getInt(DB_ID)));
-            } while (result.moveToNext());
-        }
-
-        result.close();
-        db.close();
-
-    }
-
-    public boolean dbSelectMarker () {
-
-
-        SQLiteDatabase db = helper.getReadableDatabase();
-
-        String sql = "SELECT footprint.* FROM footprint;";
-        Cursor result = db.rawQuery(sql, null);
-
-        if(result.moveToFirst()) {
-            do {
-                lbrsHash.put(articleMap.addMarker(new MarkerOptions().position(
-                                new LatLng(result.getDouble(DB_LATITUDE), result.getDouble(DB_LONGITUDE)))),
-                        String.valueOf(result.getInt(DB_ID)));
-            } while (result.moveToNext());
-
-        }
-        else {
-            return false;
-        }
-        result.close();
-        db.close();
-        return true;
+        return ;
     }
 
     public static void dbInsertPolyline(LatLng latlng) {
@@ -933,7 +926,7 @@ public class MainActivity extends AppCompatActivity {
         Cursor result = db.rawQuery(sql, null);
         LatLng latlng;
 
-        if(result!=null) {
+        if(result.getCount() > 0) {
 
             Calendar cal = Calendar.getInstance();
             cal.set(date.getYear() + 1900, date.getMonth(), date.getDate());

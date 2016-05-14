@@ -24,7 +24,7 @@ public class HttpGetArticleTask extends AsyncTask<String, String, ArticleData> {
     protected ArticleData doInBackground(String... values) {
         // TODO Auto-generated method stub
         Log.d("HGAT", "THREAD START");
-        ArticleData receiveData = new ArticleData();
+        ArticleData result = new ArticleData();
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
         InputStream inputStream;
@@ -32,7 +32,7 @@ public class HttpGetArticleTask extends AsyncTask<String, String, ArticleData> {
         HttpPost httpPost = new HttpPost("http://52.79.139.48/han/id_sel.php");
         try {
 
-
+            String[] receiveData = new String[7];
 
             Log.d("HGAT", "SETMODE PASS");
             builder.addTextBody("id", values[0], ContentType.create("Multipart/related", "utf8"));
@@ -62,43 +62,49 @@ public class HttpGetArticleTask extends AsyncTask<String, String, ArticleData> {
             BufferedReader bufferedReader = new BufferedReader(
                     new InputStreamReader(inputStream, "utf8"));
 
+
+
             String line;
             int i=0;
             int j=0;
 
-            Log.d("HGAT", bufferedReader.readLine());
 
-            if((line = bufferedReader.readLine()) != null) {
+            while((line = bufferedReader.readLine()) != null) {
 
-                Log.d("HGAT", bufferedReader.readLine());
+                Log.d("HGAT", line);
+                while(true) {
 
 
+                    receiveData[j] = line.substring(0, ((i = line.indexOf(","))) );
+                    String subString = line;
+                    line = subString.substring(i + 1);
 
-                 receiveData.id = Integer.parseInt(line.substring(0, (i = line.indexOf(",", j))));
-                 receiveData.date = line.substring(i + 1, (j = line.indexOf(",", i + 1)));
-                 receiveData.time = line.substring(j + 1, (i = line.indexOf(",", j + 1)));
-                 receiveData.article = line.substring(i + 1,(j = line.indexOf(",", i+1)));
-                 receiveData.filename = line.substring(j + 1, (i = line.indexOf(",", j + 1)));
-                 receiveData.latitude = Double.parseDouble(line.substring(i + 1, (j = line.indexOf(",", i + 1))));
-                 receiveData.longitude = Double.parseDouble(line.substring(j + 1, (line.indexOf(",", j + 1))));
+                    Log.d("HGAT", receiveData[j]);
+                    j++;
 
-                 Log.d("HGAT", receiveData.id + " " +
-                 receiveData.date + " " +
-                 receiveData.time + " " +
-                 receiveData.article + " " +
-                 receiveData.filename + " " +
-                 receiveData.latitude + " " +
-                 receiveData.longitude);
+                    if(line.indexOf("END",0) == 0) {
+                        break;
+                    }
+                }
 
 
             }
+                result.id = Integer.parseInt(receiveData[0]);
+                result.date = receiveData[1];
+                result.time = receiveData[2];
+                result.article = receiveData[3];
+                result.filename = receiveData[4];
+                result.latitude = Double.parseDouble(receiveData[5]);
+                result.longitude = Double.parseDouble(receiveData[6]);
 
 
-            bufferedReader.close();
+
+
             inputStream.close();
+            bufferedReader.close();
 
 
-            return receiveData;
+            return result;
 
 
         } catch (ClientProtocolException e) {

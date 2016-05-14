@@ -13,9 +13,11 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * 서버 통신 메소드 시작
@@ -32,7 +34,7 @@ import java.io.InputStream;
  *
  *
  */
-class HttpUploadTask extends AsyncTask<String, String, String> {
+public class HttpUploadTask extends AsyncTask<String, String, String> {
 
 
     @Override
@@ -47,8 +49,6 @@ class HttpUploadTask extends AsyncTask<String, String, String> {
         HttpPost httpPost = new HttpPost("http://52.79.139.48/dataTest.php");
 
         try {
-
-
 
             Log.d("UPLOAD", "SETMODE PASS");
             builder.addPart("image", new FileBody(new File(values[0])));
@@ -82,22 +82,37 @@ class HttpUploadTask extends AsyncTask<String, String, String> {
 
             Log.d("UPLOAD", "INPUTSTREAM PASS");
 
+
+            BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream, "utf8"));
+
+            if(bufferedReader.readLine().equals("EXIST")) {
+                Log.d("UPLOAD", "이미 같은 내용의 글이 존재할 때");
+                return "false";
+            }
+
+
+
             inputStream.close();
+            bufferedReader.close();
 
 
-        } catch (ClientProtocolException e) {
+
+
+            } catch (ClientProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             httpClient.close();
         }
-        return null;
+        return "true";
     }
 
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
+
     }
 
 

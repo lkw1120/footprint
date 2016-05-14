@@ -32,6 +32,18 @@ mysql_set_charset("utf8");
   $latitude = @$_POST["latitude"];
   $longitude = @$_POST["longitude"];
 
+/*
+  $result = mysql_query("SELECT footprint.* FROM footprint WHERE
+                        writeDate = '$date',
+                        wrtieTime = '$time',
+                        latitude = '$latitude',
+                        longitude = '$longitude';");
+  if(E$result) {
+    mysql_close($connect);
+    echo "EXIST";
+    die;
+  }
+*/
 
   $file_path = "/home/ubuntu/html/imageStorage/";
   $file_path = $file_path . basename($_FILES["filename"]["name"]);

@@ -82,7 +82,7 @@ public class HttpLBRSTask extends AsyncTask<String, String, LinkedList<LBRS>> {
             String line;
 
 
-            if((line = bufferedReader.readLine()) != null) {
+            while((line = bufferedReader.readLine()) != null) {
 
                 while(true) {
 
@@ -110,8 +110,8 @@ public class HttpLBRSTask extends AsyncTask<String, String, LinkedList<LBRS>> {
 
             }
 
-            bufferedReader.close();
             inputStream.close();
+            bufferedReader.close();
 
             Log.d("LBRS", "SUCCESS_FUNCTION");
             return receiveData;

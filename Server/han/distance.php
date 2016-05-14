@@ -56,4 +56,5 @@ echo 'END';
 // End XML file
 //echo '</markers>';
 
+mysql_close($connection);
 ?>
