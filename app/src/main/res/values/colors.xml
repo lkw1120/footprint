@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#00cc99</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#00cc99</color>
+    <color name="colorExpendButton">#00cc99</color>
+    <color name="today">#00cc99</color>
+    <color name="pastday">#00cc99</color>
+    <color name="greyed_out">#c7c7c7</color>
+    <color name="summer">#ffffff</color>
+    <color name="fall">#ffffff</color>
+    <color name="winter">#ffffff</color>
+    <color name="spring">#ffffff</color>
+</resources>

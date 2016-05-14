@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html lang="Kor">
+<head>
+	<title>비디오 재생하기</title>
+	<script>
+		function loadCaptions(track)
+		{
+			var cues = track.track.cues; //트랙의 신호 객체를 가져온다
+			var list = document.getElementById('results'); //트랙의 텍스트들을 담을 객체를 가져온다. 
+
+			for (i = 0; i < cues.length; i++)
+			{
+				var track_text = cues[i].getCueAsHTML(); //트랙의 각 신호에 대한 텍스트를 가져온다.
+				var option = document.createElement("option"); //임의의 요소를 만들고
+				option.text = track_text.textContent;          //임의의 요소에 가져온 텍스트를 지정한다.
+				option.setAttribute('data-time', cues[i].startTime); //data-time 속성을 만들고 그 속성에 시간을 지정한다.
+				list.add(option);	//목록 요소에 가져온 트랙 신호 텍스트를 추가한다.	                        
+			}
+		}
+
+		function playCaption(control) 
+		{
+			var obj = control.options[control.options.selectedIndex]; //목록 요소의 선택된 아이템 객체를 가져온다.
+			var track_cue = obj.getAttribute('data-time'); //아이템에 설정되어 있는 시간을 가져온다.
+			var video = document.getElementById('player');
+			video.currentTime = track_cue - 0.1; //비디오에 가져온 시간으로 설정하여 재생하도록 한다.
+		}
+	
+	</script>
+</head>
+<body>
+	<video id="player" src="contents/video.mp4" width="500px" controls autoplay loop>
+		<track src='contents/caption.vtt' srclang='ko' label='한국어' kind='subtitles' default onload='loadCaptions(this)'>
+	</video>
+	<div>
+        <select size='5' id='results' onchange='playCaption(this)' style='width:500px; margin-top:8px' ></select>
+    </div>
+    <div>위 자막을 클릭하시면 자막이 있는 곳으로 이동하면서 재생됩니다.</div>	
+</body>
+</html>

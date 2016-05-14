@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Drawing Page</title>
+
+<script>
+	function sidesCheck() {
+		var x = document.getElementById("lineX").value;
+		var y = document.getElementById("lineY").value;
+		// sides의 수에 따라 실행되는 함수
+		if (x < 1 || y < 1) {
+			alert("좌표를 모두 입력해야 드로잉 할 수 있습니다.");
+		} else if (x >= 1 || y >= 1) {
+			draw();
+		}
+	}
+
+	function draw() {
+
+		var canvas = document.getElementById("myCanvas");
+		var context = canvas.getContext("2d");
+		var Sx = document.getElementById("lineX").value; // x좌표 선을 그리기 위한 값
+		var Sy = document.getElementById("lineY").value; // y좌표
+
+		context.beginPath();
+		context.rect(0, 0, 500, 500);
+		context.strokeStyle = "white";
+		context.fillStyle = "white";
+		context.stroke();
+		context.fill();
+
+		var std = document.getElementsByName("select");
+
+		for (var j = 0; j < std.length; j++) {
+			if (std[j].checked == true)
+				document.getElementById("key").value = j;
+		}
+		context.lineWidth = 2;
+		context.strokeStyle = document.getElementById("SC").value;
+		context.moveTo(150, 150);
+		context.lineTo(Sx, Sy);
+		context.stroke();
+		context.closePath();
+
+		if (document.getElementById("key").value == 1) {
+
+			context.lineWidth = 2;
+			context.beginPath();
+			context.rect(20, 20, Sx, Sy);
+			context.strokeStyle = document.getElementById("SC").value;
+			context.stroke();
+
+		}
+	}
+</script>
+</head>
+<body>
+	<table>
+		<tr>
+			<td colspan="2">
+				<fieldset style="width: 300px">
+					<!-- 그룹화 -->
+					<legend>선택해주세요</legend>
+					<!-- 그룹의 제목 -->
+					Line<input type="radio" name="select" id="Line" checked="checked"
+						onselect="draw()"></input> <br /> Rect<input type="radio"
+						name="select" id="Rect" onselect="draw1()"></input> <br /> <input
+						type="hidden" name="key" id="key">
+					<!-- radio 버트에서 받아온 value값 숨기기 -->
+					Stroke Color : <input type="color" name="S_Color" id="SC"></input>
+				</fieldset> <br />
+				<fieldset style="width: 300px">
+					<!-- 그룹화 -->
+					<legend>입력해주세요</legend>
+					<!-- 그룹의 제목 -->
+					X좌표 : <input type="number" name="P-Sides" id="lineX"></input>
+					<p></p>
+					Y좌표 : <input type="number" name="P-Sides" id="lineY"></input>
+				</fieldset> <br /> <input type="button" value="Submit" name="bt"
+				onClick="sidesCheck();"></input> <br />
+
+				<canvas id="myCanvas" width="300" height="300"
+					style="border: 10px inset #aaa">캔버스</canvas>
+
+			</td>
+			<td>
+				<canvas id="myCanvas1" width="400" height="450"></canvas> <script
+					type="text/javascript" src="js/memo_canvas.js"></script> <br />
+				<button onclick="save();">Save</button>
+				<button onclick="restore();">Restore</button>
+				<button onclick="initialize();">Clear</button>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

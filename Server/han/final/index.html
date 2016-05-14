@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>12124914한주환</title>
+		<link rel="stylesheet" type="text/css" href="demo.css" />
+		<link rel="stylesheet" type="text/css" href="component.css" />
+
+	<style>
+	  aside  { width: 15%; float: right; height:600px; border:none; margin:1%;
+				background: linear-gradient(45deg, #85FFFF, #A7EEFF, #FFFFFF); }	
+	</style>
+		<script type="text/javascript" src="js/jquery.js"></script>
+		<script type="text/javascript" src="js/interface.js"></script>
+		<script type="text/javascript" src="js/drag&drop.js"></script>
+	</head>
+	<body>
+		<div class="container">
+			<header class="clearfix">
+				<h1>인하 문화의 거리 소개</h1>
+				<nav>				
+					<a href="http://www.inha.ac.kr" target="_blank" class="b" data-info="Inha University"><span>인하대홈페이지</span></a>
+					<a href=""class="" data-info="홈으로"><span>홈으로</span></a>
+					<a href=""class="" data-info="문의사항"><span>문의사항</span></a>
+					<a href="" class="" data-info="Join us" onClick="alert('준비중입니다.')"><span>Join us</span></a>
+					<p/>
+					<form name="login">						
+						ID : <input type="text" name="uid">&nbsp; Password : <input type="password" name="upw">
+						&nbsp;	<input type="button" value="OK" onClick="alert('로그인 되었습니다.')">	 <!-- 임시 알림 -->				 		
+					</form>
+				</nav>
+			</header>
+			
+			<aside style="float:right">
+			<div id="cart" class="cart">
+				<table>
+					<tr>
+					<td align="center">&nbsp;&nbsp;●&nbsp;찜한 장소<br>
+					(장소를 드래그 해주세요)<br/>
+					<font>Food와 Cafe만 구현시킴</font>
+					</td>
+					</tr>
+					<tr height=600px>
+				<td id="zzim">
+				
+				</td>
+				<!-- 드래그 영역 -->
+					</tr>
+					
+				</table>
+			</div>
+			
+			</aside>
+				
+			<div id="tabs" class="tabs">
+				<nav>
+					<ul>
+						<li><a href="#section-1" class="icon-shop"><span>Food</span></a></li>
+						<li><a href="#section-2" class="icon-cup"><span>Cafe</span></a></li>
+						<li><a href="#section-3" class="icon-food"><span>Drink</span></a></li>
+						<li><a href="#section-4" class="icon-lab"><span>Play</span></a></li>
+						<li><a href="#section-5" class="icon-truck"><span>Map</span></a></li>
+						<li><a href="#section-6" class="icon-truck"><span>Board</span></a></li>
+						<li><a href="#section-7" class="icon-truck"><span>etc</span></a></li>
+					</ul>
+				</nav>		
+				<div class="content">
+					<section id="section-1">
+						<article class="product" id="product1">
+						<div class="mediabox">
+							<a href="video.html" target="_blank">
+								<img src="contents/gob.jpg" />
+							</a>
+								<h3>본가 곱돌이와 곱순이</h3>
+								<p>여러 곱창을 한번에 맛 볼수 있는 곳<br/>032-875-3280</p>
+						</div>
+						</article>
+						<article class="product" id="product2">
+						<div class="mediabox">
+							<a href="info.html" target="_blank">
+								<img src="contents/burger.jpg" />
+							</a>
+							<h3>뚱's 밥 버거</h3>
+							<p>싸고 다양한 밥 버거를 맛 볼수 있는 곳<br/>032-881-8057</p>
+						</div>
+						</article>
+						<article  class="product" id="product3">
+						<div class="mediabox">
+							<a href="info.html" target="_blank">
+								<img src="contents/gosu.jpg" />
+							</a>
+							<h3>古 秀 찜닭</h3>
+							<p>맛있는 찜닭과 볶음밥을<br/>032-867-9982<br/><br/><br/></p>
+						</div>
+						</article>
+						<article  class="product" id="product4">
+						<div class="mediabox">
+							<a href="info.html" target="_blank">
+								<img src="contents/wooriso.jpg" />
+							</a>
+							<h3>우리소 참한우</h3>
+							<p>맛이는 한우가 있는 곳 <br/>032-875-3666</p>
+						</div>
+						</article>	
+						<article  class="product" id="product5">
+						<div class="mediabox">
+							<a href="info.html" target="_blank">
+							<img src="contents/kong.jpg" />
+							</a>
+							<h3>콩불</h3>
+							<p>매우면서 맛있는 콩불<br/>032-867-0989</p>
+						</div>
+						</article>
+						<article  class="product" id="product6">
+						<div class="mediabox">
+							<a href="info.html" target="_blank">
+							<img src="contents/bab.jpg" />
+							</a>
+							<h3>조은밥상</h3>
+							<p>값싸고 맛있은 밥집<br/>032-863-6566</p>
+						</div>
+						</article>
+					</section>
+					<section id="section-2">
+						<article  class="product" id="product7">
+						<div class="mediabox">
+							<img src="contents/abbey.jpg" />
+							<h3>ABBEY ROAD</h3>
+							<p>마약주스를 맛 볼수 있는 곳<br/>032-872-8549</p>
+						</div>
+						</article>
+						<article class="product" id="product8"> 
+						<div class="mediabox">
+							<img src="contents/sweet.jpg" />
+							<h3>SWEET BUNS COFFEE</h3>
+							<p>싸고 맛있는 커피와 생과일주스를 마실수 있는 곳<br/>032-868-1589</p>
+						</div>
+						</article>
+						<article class="product" id="product9">
+						<div class="mediabox">
+							<img src="contents/maple.jpg" />
+							<h3>MAPLE COFFEE</h3>
+							<p>한적하게 맛있는 커피를 맛 볼 수 있는 곳<br>032-872-1720</p>
+						</div>
+						</article>						
+					</section>
+					<section id="section-3">
+						<article>
+						<div class="mediabox">
+							<img src="contents/beer.jpg" />
+							<h3>Noodle Curry</h3>
+							<p>Lotus root water spinach fennel kombu maize bamboo shoot green bean swiss chard seakale pumpkin onion chickpea gram corn pea.Sushi gumbo beet greens corn soko endive gumbo gourd.</p>
+						</div>
+						</article>
+						<article>
+						<div class="mediabox">
+							<img src="contents/jujung.jpg" />
+							<h3>Leek Wasabi</h3>
+							<p>Sushi gumbo beet greens corn soko endive gumbo gourd. Parsley shallot courgette tatsoi pea sprouts fava bean collard greens dandelion okra wakame tomato.</p>
+						</div>
+						</article>
+						<article>
+						<div class="mediabox">
+							<img src="contents/giga.jpeg" />
+							<h3>Green Tofu Wrap</h3>
+							<p>Pea horseradish azuki bean lettuce avocado asparagus okra. Kohlrabi radish okra azuki bean corn fava bean mustard tigernut wasabi tofu broccoli mixture soup.</p>
+						</div>
+						</article>
+					</section>
+					<section id="section-4">
+						<article>
+						<div class="mediabox">
+							<img src="contents/nice.jpg" />
+							<h3>Tomato Cucumber Curd</h3>
+							<p>Chickweed okra pea winter purslane coriander yarrow sweet pepper radish garlic brussels sprout groundnut summer purslane earthnut pea tomato spring onion azuki bean gourd. </p>
+						</div>
+						</article>
+						<article>
+						<div class="mediabox">
+							<img src="contents/billi.jpg" />
+							<h3>Mushroom Green</h3>
+							<p>Salsify taro catsear garlic gram celery bitterleaf wattle seed collard greens nori. Grape wattle seed kombu beetroot horseradish carrot squash brussels sprout chard.</p>
+						</div>
+						</article>
+						<article>
+						<div class="mediabox">
+							<img src="contents/pcroom.jpg" />
+							<h3>Swiss Celery Chard</h3>
+							<p>Celery quandong swiss chard chicory earthnut pea potato. Salsify taro catsear garlic gram celery bitterleaf wattle seed collard greens nori. </p>
+						</div>
+						</article>
+					</section>
+					<section id="section-5">
+					<div align="center">
+						<iframe src="Geolocation.html" style="border:none;" height=600 width=80% >
+						</iframe>	
+					</div>			
+					</section>
+					<section id="section-6">
+					<div align="center">
+						<iframe src="board.html" style="border:none;" height=600 width=80% >
+						</iframe>	
+					</div>			
+					</section>
+					<section id="section-7">
+					<div align="center">
+						<iframe src="drawing.html" style="border:none;" height=600 width=80% >
+						</iframe>
+
+					</div>
+					</section>
+				</div><!-- /content -->
+			</div><!-- /tabs -->
+			<footer>
+			<p class="info">2014년 2학기 인터넷프로그래밍 ⓒ한주환</p>
+			</footer>		
+		</div>
+		<script src="js/cbpFWTabs.js"></script>
+		<script>
+			new CBPFWTabs( document.getElementById( 'tabs' ) );
+		</script>	
+		<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+		<script type="text/javascript">
+        _uacct = "UA-729064-2";
+        urchinTracker();
+        </script>
+		<script src="js/drag&drop.js"></script>
+	</body>
+</html>
+
+
+

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>board</title>
+<link rel="stylesheet" type="text/css" href="demo.css" />
+		<link rel="stylesheet" type="text/css" href="component.css" />
+<style>
+legend {font-weight: bold;} 				/* h2요소 */
+</style>
+
+<script>
+	
+	document.addEventListener("DOMContentLoaded", function(event) {
+		
+		var nick = document.getElementById("nick");
+		var review = document.getElementById("review");
+		var regist = document.getElementById("regist");
+		var del = document.getElementById("del");
+		var check = document.getElementById("check");
+		var content = document.getElementById("content");
+		
+	// 로컬스토리지에 데이터 등록
+	regist.addEventListener("click", function(event) {
+		if(nick.value !== "") {								//닉네임을 입력할경우
+			localStorage.setItem(nick.value, review.value);		//닉네임과 리뷰를 받는다
+			printContents();									//화면출력
+		}	
+		
+	});
+	
+	//로컬스토리지에 데이터 삭제
+	del.addEventListener("click", function(event) {
+		if(nick.value !== "") {								//닉네임을 입력할경우
+			localStorage.removeItem(nick.value);				//닉네임으로 저장된 데이터를 지운다
+			printContents();									//화면출력
+		}
+	});
+	
+	//로컬스토리지에 저장된 데이터 확인
+	check.addEventListener("click", function(event){				
+		var key = nick.value;									//입력한 닉네임 저장
+		var value = localStorage.getItem(nick.value);			//입력한 닉네임의 리뷰를 받아온다.
+		
+		alert("조회 : " + key +" - "+ value);						//닉네임과 리뷰를 알려주는 창
+		
+	});
+	
+	//로컬스토리지에 저장된 데이터를 화면에 출력함수
+	function printContents() {
+		var str ="";
+		
+		for (var i = 0, len = localStorage.length; i < len; i++) {
+			var key = localStorage.key(i);
+			var value = localStorage.getItem(key);
+			
+			str += key + " : " + value + "<br />";				//저장된 데이터가 출력시 글자 표시방법
+		}
+		content.innerHTML = str
+		key.value = ""; value.value = "";
+	}
+	
+		printContents();										//화면출력
+	});
+			
+</script>
+</head>
+<body>
+	<form>
+		<fieldset style="width: 90%">		<!-- 그룹화 -->
+			<legend>후기 작성</legend>			<!-- 그룹화 제목 -->
+			<table>
+				<tr>
+					<th>&nbsp;닉&nbsp;네&nbsp;임&nbsp;: </th>
+					<td><input type="text" id="nick" /></td>
+				</tr>
+				<tr>
+					<th>한줄후기 :</th>
+					<td><input type="text" id="review" size="80%" /></td>
+				</tr>
+			</table>
+			<div align="right">
+			<input type="button" id="regist" value="등록 및 수정" />
+			<input type="button" id="del" value="삭제"/>
+			<input type="button" id="check" value="조회" />
+			</div>
+		</fieldset>
+	</form>
+	<p></p>
+	
+	<p></p>
+<div>
+<h1>내용</h1>
+<span id="content">
+</span>					<!-- 로컬스토리지에 저장된 데이터 출력 -->
+</div>
+</body>
+</html>

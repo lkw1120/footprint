@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="footprint.footprint.MainActivity">
+
+    <!-- 달력과 타임라인 들어갈 곳 -->
+
+
+    <footprint.footprint.CalendarView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:calendarNS="http://schemas.android.com/apk/res/footprint.footprint"
+        android:id="@+id/calendar_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        calendarNS:dateFormat="MMMM yyyy"/>
+
+
+
+    <fragment
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.google.android.gms.maps.SupportMapFragment" />
+
+
+    <!---->
+
+    <!-- 달력과 타임라인 들어갈 곳 끝 -->
+
+
+
+</LinearLayout>

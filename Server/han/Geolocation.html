@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>구글맵 사용</title>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+	<meta charset="utf-8">
+	<style>
+		html, body, #map-canvas { height: 90%; margin: 0px; padding: 0px }
+	</style>
+	<!-- 이곳에 스크립트 코드를 입력한다. -->	
+		<script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDnYvRXTrr5v9doGXuKl73SKK3EtdBBe1w&sensor=false">
+		</script>
+		
+		<script type="text/javascript">
+			
+		var map, lat = lat = 37.451128, lng = 126.656815;
+		var zoomControl = 17;
+		
+			function plus() {
+				if(zoomControl < 21){
+						zoomControl = zoomControl + 1;
+				}
+				initialize();
+			}
+			
+			function minus() {
+				if(zoomControl > 0){
+					zoomControl = zoomControl - 1;
+				}
+				initialize();
+			}
+		
+
+			function jooahn() {
+				lat = 37.4650350;
+				lng = 126.6799540;
+				initialize();
+				
+			};
+			
+			function inha() {
+				lat = 37.451128;
+				lng = 126.656815;
+				initialize();
+				
+			};
+			
+
+			function initialize() {
+				
+				var mapOptions = {zoom:zoomControl, center:new google.maps.LatLng(lat, lng)};
+				
+				map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+				
+			};
+			
+			google.maps.event.addDomListener(window, 'load', initialize);
+		
+		
+		
+		</script>
+	
+	
+	
+	</head>
+<body>
+	<p>인하대 및 주안역 주변</p><hr/>
+	<div id="button">
+		<input type="button" id="plus" onClick="plus()" value="+" />
+		<input type="button" id="minus" onClick="minus()" value="-" />
+		<input type="button" id="inha" onClick="inha()" value="인하대후문" />
+		<input type="button" id="jooahn" onClick="jooahn()" value="주안역" />
+	</div>
+	<div id="map-canvas"></div>
+</body>
+</html>

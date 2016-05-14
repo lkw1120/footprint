@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">FootPrint</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_exit">Exit</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="camera_button">CAMERA</string>
+    <string name="gallary_button">GALLARY</string>
+    <string name="save_button">SAVE</string>
+    <string name="image_upload">Image Upload area</string>
+    <string name="new_article">NEW</string>
+</resources>

@@ -1,0 +1,985 @@
+package footprint.footprint;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.media.ExifInterface;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.provider.Settings;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+
+import static android.media.ExifInterface.TAG_DATETIME;
+
+
+public class MainActivity extends AppCompatActivity {
+
+
+    //변수는 여기에서(?)
+    //private WebView webView = null;
+
+    private View writeView = null;
+    private View mainView = null;
+    private View articleView = null;
+    private View calendarView = null;
+
+    private View mainButtons = null;
+    private View writeButtons = null;
+    private View btnLayout = null;
+
+    private TextView articleDateTime = null;
+    private TextView articleText = null;
+    private ImageButton articleImageButton = null;
+    private TextView articleLatitude = null;
+    private TextView articleLongitude = null;
+
+
+    private Button writeButton = null;
+    private Button recordButton = null;
+    private Button calButton = null;
+
+    private static GoogleMap map = null;
+    private static SupportMapFragment mapFragment = null;
+    private static LocationManager manager = null;
+    private static GPSListener gpsListener = null;
+    private static PolylineOptions pOptions = new PolylineOptions();
+    private static PolylineOptions pastPolyOptions = new PolylineOptions();
+    private static Double latitude = null;
+    private static Double longitude = null;
+    private static float gpsLocation[] = new float[2];
+
+
+    protected static SupportMapFragment articleMapFragment;
+    protected static GoogleMap articleMap;
+
+    protected static HashMap<Object,String> markerIdHash = new HashMap<>();
+    protected static LinkedList<LatLng> polylineHash = new LinkedList<>();
+    protected static LinkedList<LBRS> lbrsList = null;
+    protected static HashMap<Object,String> lbrsHash = new HashMap<>();
+
+    protected static ArticleData articleData = null;
+
+    private ImageView imageView = null;
+    private File imageFile = null;
+    private ExifInterface exif = null;
+    private EditText inputText = null;
+
+    private int polyColor;
+
+    private final static int GPS_TIME_CYCLE = 60000;
+    private final static int GPS_DISTANCE_CYCLE = 5;
+
+    private final static int GO_CAMERA = 1;
+    private final static int GO_GALLARY = 2;
+
+    private final static int DB_ID = 0;
+    private final static int DB_DATE = 1;
+    private final static int DB_TIME = 2;
+    private final static int DB_ARTICLE = 3;
+    private final static int DB_FILENAME = 4;
+    private final static int DB_LATITUDE = 5;
+    private final static int DB_LONGITUDE = 6;
+
+    private final static int POLYLINE_ID = 0;
+    private final static int POLYLINE_DATE = 1;
+    private final static int POLYLINE_LATITUDE = 2;
+    private final static int POLYLINE_LONGITUDE = 3;
+
+    private boolean recordOn = false;
+    private boolean calendarOn = true;
+    private boolean lbrsChecker = false;
+    protected static boolean getArticleFinish = false;
+    protected static boolean lbrsFinish = false;
+
+    private static DBOpenHelper helper;
+
+
+    private LatLng mainMarkerPosition = null;
+    private static Date today = new Date();
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        startActivity(new Intent(this, PreLoadActivity.class));
+        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        /**
+         * DB 설정
+         */
+        helper = new DBOpenHelper(this, "footprint.db", null, 1);
+        //helper.setWriteAheadLoggingEnabled(false);
+
+
+        //메인 페이지 초기화
+        mainView = findViewById(R.id.mainPage);
+        mainView.setVisibility(View.VISIBLE);
+        writeView = findViewById(R.id.writePage);
+        writeView.setVisibility(View.GONE);
+        articleView = findViewById(R.id.articlePage);
+        articleView.setVisibility(View.GONE);
+        calendarView = findViewById(R.id.calendar_view);
+        calendarView.setVisibility(View.VISIBLE);
+
+
+        //글 페이지 초기화
+        articleDateTime = (TextView) findViewById(R.id.articleDateTime);
+        articleText = (TextView) findViewById(R.id.articleText);
+        articleImageButton = (ImageButton) findViewById(R.id.articleImageButton);
+        articleLatitude = (TextView) findViewById(R.id.articleLatitude);
+        articleLongitude = (TextView) findViewById(R.id.articleLongitude);
+
+
+
+
+
+        //버튼 초기화
+        btnLayout = findViewById(R.id.btnLayout);
+        btnLayout.setVisibility(View.VISIBLE);
+        mainButtons = findViewById(R.id.btnMainPage);
+        mainButtons.setVisibility(View.VISIBLE);
+        writeButtons = findViewById(R.id.btnWritePage);
+        writeButtons.setVisibility(View.GONE);
+
+
+
+        //맵 초기화
+        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        map = mapFragment.getMap();
+        //마커 클릭 이벤트 설정
+        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+
+                dbSelectArticle(markerIdHash.get(marker));
+                goArticlePage();
+                return true;
+            }
+        });
+        startLocationService();
+
+
+        //글상에서 보이는 맵 초기화 및 마커 클릭 이벤트 설정
+        articleMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.articleMap);
+        articleMap = articleMapFragment.getMap();
+        articleMap.getUiSettings().setMyLocationButtonEnabled(false);
+        articleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+
+
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                if(mainMarkerPosition != marker.getPosition()) {
+                    try {
+                        articleData = new HttpGetArticleTask().execute(lbrsHash.get(marker)).get();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    viewArticle(articleData);
+                }
+                return true;
+            }
+
+        });
+
+        //articleMap.getUiSettings().setAllGesturesEnabled(false);
+
+        //지도를 그림으로 볼지 사진으로 볼지 결정
+
+        //map.getUiSettings().setMyLocationButtonEnabled(false);
+        //map.getUiSettings().setAllGesturesEnabled(false);
+
+
+        recordButton = (Button) findViewById(R.id.trackRecord);
+        writeButton = (Button) findViewById(R.id.goWritePage);
+        calButton = (Button) findViewById(R.id.calendarOn);
+        recordButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                recordOnOff();
+            }
+        });
+        calButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                calendarOnOff();
+            }
+        });
+        writeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                writeView.setVisibility(View.VISIBLE);
+                mainView.setVisibility(View.GONE);
+                writeButtons.setVisibility(View.VISIBLE);
+                mainButtons.setVisibility(View.GONE);
+            }
+        });
+
+
+        //글작성 페이지 세팅
+        Button camButton = (Button) findViewById(R.id.camButton);
+        Button galButton = (Button) findViewById(R.id.galButton);
+        Button savButton = (Button) findViewById(R.id.saveButton);
+        camButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onNavCameraPressed();
+            }
+        });
+        galButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onNavGallaryPressed();
+            }
+        });
+        savButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+        public void onClick(View v) {
+                onSavePressed();
+            }
+        });
+
+        imageView = (ImageView) findViewById(R.id.imageView);
+        inputText = (EditText) findViewById(R.id.inputText);
+
+
+        //글보기 페이지 세팅
+
+
+    }
+
+
+
+
+
+
+
+    @Override
+    public void onBackPressed() {
+        if(writeView.getVisibility() == View.VISIBLE)  {
+            mainView.setVisibility(View.VISIBLE);
+            writeView.setVisibility(View.GONE);
+            mainButtons.setVisibility(View.VISIBLE);
+            writeButtons.setVisibility(View.GONE);
+            writeViewReset();
+        }
+        else if(articleView.getVisibility()==View.VISIBLE) {
+            mainView.setVisibility(View.VISIBLE);
+            articleView.setVisibility(View.GONE);
+            mainButtons.setVisibility(View.VISIBLE);
+            btnLayout.setVisibility(View.VISIBLE);
+            writeViewReset();
+        }
+        else{
+
+            //db_delete();
+            super.onBackPressed();
+            //임시용
+        }
+
+    }
+
+
+    public void writeViewReset(){
+
+        imageFile = null;
+        imageView.setImageResource(0);
+        gpsLocation[0] = gpsLocation[1] = 0.0f;
+        inputText.setText(null);
+    }
+
+
+    public void goArticlePage() {
+        if(writeView.getVisibility() == View.VISIBLE){
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(inputText.getWindowToken(), 0);
+            articleView.setVisibility(View.VISIBLE);
+            writeView.setVisibility(View.GONE);
+            btnLayout.setVisibility(View.VISIBLE);
+            writeButtons.setVisibility(View.GONE);
+        }
+        else {
+            articleView.setVisibility(View.VISIBLE);
+            btnLayout.setVisibility(View.GONE);
+            mainView.setVisibility(View.GONE);
+        }
+    }
+
+
+    /**
+     * GPS 관련 메소드 시작
+     *
+     */
+    private void startLocationService() {
+        // 위치 관리자 객체 참조
+        manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        polyColor = colorSelector(Calendar.getInstance());
+        boolean isGps = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (!isGps) {
+            Toast.makeText(this, "어플리케이션을 이용하기 위해서는 GPS를 활성화해야합니다.", Toast.LENGTH_SHORT).show();
+            startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
+        }
+
+
+        // 위치 정보를 받을 리스너 생성
+        gpsListener = new GPSListener();
+        long minTime = GPS_TIME_CYCLE;
+        float minDistance = GPS_DISTANCE_CYCLE;
+
+        try {
+            // GPS를 이용한 위치 요청
+            manager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    minTime,
+                    minDistance,
+                    gpsListener);
+
+            // 네트워크를 이용한 위치 요청
+            manager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    minTime,
+                    minDistance,
+                    gpsListener);
+
+            // 위치 확인이 안되는 경우에도 최근에 확인된 위치 정보 먼저 확인
+            Location lastLocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (lastLocation != null) {
+                latitude = lastLocation.getLatitude();
+                longitude = lastLocation.getLongitude();
+
+                //Toast.makeText(getApplicationContext(), "Last Known Location : " + "Latitude : " + latitude + "\nLongitude:" + longitude, Toast.LENGTH_LONG).show();
+            }
+        } catch (SecurityException ex) {
+            ex.printStackTrace();
+        }
+
+
+        //Toast.makeText(getApplicationContext(), "위치 확인이 시작되었습니다. 로그를 확인하세요.", Toast.LENGTH_SHORT).show();
+
+    }
+
+    /**
+     * 리스너 클래스 정의
+     */
+    private class GPSListener implements LocationListener {
+        /**
+         * 위치 정보가 확인될 때 자동 호출되는 메소드
+         */
+        public void onLocationChanged(Location location) {
+
+            latitude = location.getLatitude();
+            longitude = location.getLongitude();
+
+
+            String msg = "Latitude : " + latitude + "\nLongitude:" + longitude;
+            Log.i("GPSListener", msg);
+            //String accuracy = "정확도 : " + location.getAccuracy();
+
+
+            if (location.getAccuracy() < 50.0 && recordOn) {
+
+                pOptions.geodesic(true);
+                LatLng latlng = new LatLng(latitude, longitude);
+                pOptions.add(latlng).color(polyColor);
+
+                dbInsertPolyline(latlng);
+                if(dateFrame(CalendarView.selectedDateInfo).equals(dateFrame(today))) {
+
+                    map.addPolyline(pOptions);
+                }
+
+            }
+
+
+            //지도에 내 위치 표시
+            try {
+                map.setMyLocationEnabled(true);
+            } catch (SecurityException ex) {
+                ex.printStackTrace();
+            }
+            showCurrentLocation(latitude, longitude);
+        }
+        /**
+         * 현 위치를 중심으로 화면에 지도를 띄워주는 메소드
+         */
+        private void showCurrentLocation(Double latitude, Double longitude) {
+            LatLng curPoint = new LatLng(latitude, longitude);
+            //map.animateCamera(CameraUpdateFactory.newLatLngZoom(curPoint, 16));
+
+            //지도를 그림으로 볼지 사진으로 볼지 결정
+            map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
+        }
+
+        public void onProviderDisabled(String provider) {
+
+        }
+
+        public void onProviderEnabled(String provider) {
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+
+    }
+
+
+    /**
+     *  카메라를 선택하면 동작하는 메소드
+     */
+    public void onNavCameraPressed() {
+
+        String path = Environment.getExternalStorageDirectory()+"/DCIM/Camera/temp_image.jpg";
+        imageFile = new File(path);
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(imageFile));
+
+        if(intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, GO_CAMERA);
+        }
+    }
+
+
+    /**
+     *  갤러리를 선택하면 동작하는 메소드
+     */
+    public void onNavGallaryPressed() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
+        intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, GO_GALLARY);
+    }
+
+
+    /**
+     * Intent 후처리 메소드
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if(resultCode == RESULT_OK) {
+            if (requestCode == GO_CAMERA) {
+                //카메라 촬영 선택했을 경우
+
+                Toast.makeText(this,"후처리 시작",Toast.LENGTH_SHORT).show();
+                //임시로 생성한 이미지 이름을 다시 변경
+                imageRename();
+
+                //Toast.makeText(this, "1", Toast.LENGTH_SHORT).show();
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                //Toast.makeText(this, "2", Toast.LENGTH_SHORT).show();
+
+                options.inSampleSize = 2;
+                //Toast.makeText(this, "3", Toast.LENGTH_SHORT).show();
+
+
+                sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(imageFile)));
+                //Toast.makeText(this, "4", Toast.LENGTH_SHORT).show();
+
+                //이미지 데이터를 비트맵으로 받아온다.
+                Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
+                //Toast.makeText(this, "5", Toast.LENGTH_SHORT).show();
+
+                //화면에 뿌리기
+                imageView.setImageBitmap(bitmap);
+            }
+            else if (requestCode == GO_GALLARY) {
+                try {
+                    //Uri에서 이미지 이름을 얻어온다.
+                    //String name_Str = getImageNameToUri(data.getData());
+                    imageFile = new File(getPath(data.getData()));
+
+                    //이미지 데이터를 비트맵으로 받아온다.
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
+
+                    //화면에 뿌리기
+                    imageView.setImageBitmap(bitmap);
+
+                } catch (FileNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Toast.makeText(this, "이미지 불러왔음", Toast.LENGTH_SHORT).show();
+
+                //이미지 불러와서 넣기
+            }
+            else {
+                Toast.makeText(this, "Activity is canceled",Toast.LENGTH_SHORT).show();
+            }
+
+            //Toast.makeText(this , imageFile.getAbsolutePath() , Toast.LENGTH_SHORT).show();
+
+        }
+        else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+
+
+    }
+    public String getPath(Uri uri) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        startManagingCursor(cursor);
+        int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(columnIndex);
+    }
+
+    /**
+     * 파일 이름 재설정 작업
+     * 파일 생성 시분초로 이름을 변경시킨다 - 갤럭시 시리즈 기준
+     */
+    public void imageRename() {
+        try {
+            exif = new ExifInterface(imageFile.getAbsolutePath());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error!", Toast.LENGTH_LONG).show();
+        }
+
+        String fileRename;
+        fileRename = exif.getAttribute(TAG_DATETIME);
+
+        //Toast.makeText(this,exif.getAttribute(TAG_DATETIME),Toast.LENGTH_SHORT).show();
+
+        fileRename = fileRename.replace(":", "");
+        fileRename = fileRename.replace(" ", "_");
+        //Toast.makeText(this,fileRename,Toast.LENGTH_LONG).show();
+        File imageNameOrigin =
+                new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
+                        "/DCIM/Camera/", "temp_image.jpg");
+        File imageNameChanged =
+                new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
+                        "/DCIM/Camera/", fileRename + ".jpg");
+
+        //Toast.makeText(this,imageNameChanged.getAbsolutePath(),Toast.LENGTH_LONG).show();
+        imageNameOrigin.renameTo(imageNameChanged);
+        imageFile = imageNameChanged;
+        //exif = null;
+        //파일 이름 재설정 작업 완료
+    }
+
+
+    /**
+     * 저장 (및 업로드 처리)
+     */
+    public void onSavePressed(){
+        if(imageFile == null) {
+            Toast.makeText(this,"이미지를 먼저 업로드 하세요", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            try {
+                exif = new ExifInterface(imageFile.getAbsolutePath());
+                //db_insert();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Error!", Toast.LENGTH_SHORT).show();
+            }
+
+            if(!exif.getLatLong(gpsLocation)) {
+                Toast.makeText(this,"GPS 정보가 존재하지 않습니다", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                //Toast.makeText(this, gpsLocation[0] + ", " + gpsLocation[1], Toast.LENGTH_SHORT).show();
+                dbInsertArticle();
+                Log.d("INSERT", "SUCCESS");
+                dbSelectArticle(null);
+                Log.d("SELECT", "SUCCESS");
+                goArticlePage();
+                writeViewReset();
+            }
+        }
+    }
+
+
+    /**
+     * 요일마다 색깔을 다르게 구분
+     * 일단은 어플을 실행했을때 한번만 실행되게 해놓았음
+     */
+    public static int colorSelector(Calendar cal){
+        switch(cal.get(Calendar.DAY_OF_WEEK)){
+            case 1:
+                return Color.RED;
+            case 2:
+                return Color.YELLOW;
+            case 3:
+                return Color.GREEN;
+            case 4:
+                return Color.CYAN;
+            case 5:
+                return Color.BLUE;
+            case 6:
+                return Color.MAGENTA;
+            case 7:
+                return Color.DKGRAY;
+            default:
+                return Color.BLACK;
+        }
+    }
+
+
+    /**
+     * CalendarView 클래스로부터 받은 날짜값으로 Marker 리스트 뽑아 출력하는 메소드
+     * CalendarView 클래스로부터 받은 날짜값으로 Polyline 을 출력하는 메소드
+     *
+     */
+    public static void displayMapSubInfo(Date date) {
+        //날짜를 바꿀때마다 id리스트 초기화
+
+        markerIdHash.clear();
+        polylineHash.clear();
+        pastPolyOptions =  new PolylineOptions();
+        map.clear();
+        dbSelectMarkerByDate(date);
+        dbSelectPolylineByDate(date);
+    }
+
+    public void recordOnOff() {
+        if(recordOn) {
+            recordButton.setText("RECORD");
+            recordOn = false;
+        }
+        else {
+            recordButton.setText("RECORDED");
+            recordOn = true;
+        }
+
+    }
+    public void calendarOnOff() {
+        if(calendarOn) {
+            calButton.setText("OFF");
+            calendarView.setVisibility(View.GONE);
+            calendarOn = false;
+        }
+        else {
+            calButton.setText("ON");
+            calendarView.setVisibility(View.VISIBLE);
+            calendarOn = true;
+        }
+    }
+
+
+    public void viewArticle(ArticleData values) {
+
+        //실제 필요한 작업 처리
+        articleDateTime.setText(values.date + " " + values.time);
+        articleText.setText(values.article);
+
+        articleLatitude.setText(String.valueOf(values.latitude));
+        articleLongitude.setText(String.valueOf(values.longitude));
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        //Toast.makeText(this, "2", Toast.LENGTH_SHORT).show();
+
+
+        articleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        articleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(values.latitude, values.longitude), 16));
+
+        options.inSampleSize = 4;
+
+        if(values.filename != null) {
+            imageFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
+                    "/DCIM/Camera/",values.filename);
+
+            //이미지 데이터를 비트맵으로 받아온다.
+            Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
+            //화면에 뿌리기
+            articleImageButton.setImageBitmap(bitmap);
+        }
+
+    }
+
+    /**
+     * 데이터베이스 SQL 설정
+     *
+     * http://kuroikuma.tistory.com/75 참조
+     *
+     */
+    public void dbInsertArticle() {
+
+        SQLiteDatabase db = helper.getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        //db.insert의 매개변수인 values가 ContentValues 변수이므로 그에 맞춤
+        //데이터 삽입은 put을 이용한다.
+
+        String datetime = exif.getAttribute(TAG_DATETIME);
+        datetime = datetime.replaceFirst(":","-");
+        datetime = datetime.replaceFirst(":", "-");
+
+
+        ArticleData values = new ArticleData();
+
+
+        values.date = datetime.substring(0, 10);
+        values.time = datetime.substring(11, 19);
+        values.article = inputText.getText().toString();
+        values.filename = imageFile.getName();
+        values.latitude = gpsLocation[0];
+        values.longitude = gpsLocation[1];
+
+
+
+        //Toast.makeText(this,"DB_INSERT_SUCCESS",Toast.LENGTH_SHORT).show();
+        contentValues.put("date", values.date);
+        contentValues.put("time", values.time);
+        contentValues.put("article", values.article);
+        contentValues.put("filename", values.filename);
+        contentValues.put("latitude", values.latitude);
+        contentValues.put("longitude", values.longitude);
+        db.insert("footprint", null, contentValues);
+
+        db.close();
+
+        //업로드 스레드 실행
+
+        /** 업로드 스레드
+         *
+         */
+        new HttpUploadTask().execute(
+                imageFile.getAbsolutePath(),
+                String.valueOf(0),
+                values.date,
+                values.time,
+                values.article,
+                values.filename,
+                String.valueOf(values.latitude),
+                String.valueOf(values.longitude));
+
+
+    }
+
+    public void dbSelectArticle(String idCode) {
+
+
+        ArticleData values = new ArticleData();
+
+
+        SQLiteDatabase db = helper.getReadableDatabase();
+        Cursor result;
+
+        /**
+         * idCode에 서버DB와 내부DB를 구분하는 정보를 넣어서 분리처리할 것
+         *
+         */
+
+
+        if(idCode == null) {
+            result = db.rawQuery("SELECT footprint.* FROM footprint;", null);
+
+        }
+        else {
+            result = db.rawQuery("SELECT footprint.* FROM footprint WHERE _id = " + Integer.parseInt(idCode) + ";",null);
+        }
+        result.moveToLast();
+        Log.d("ARTICLE", "DB_SEARCH_SUCCESS!");
+        Log.d("ID_MATCH", idCode + " " + result.getInt(DB_ID));
+        //while (!result.isAfterLast()){
+
+        values.id = result.getInt(DB_ID);
+        values.date = result.getString(DB_DATE);
+        values.time = result.getString(DB_TIME);
+        values.article = result.getString(DB_ARTICLE);
+        values.filename = result.getString(DB_FILENAME);
+        values.latitude = result.getDouble(DB_LATITUDE);
+        values.longitude = result.getDouble(DB_LONGITUDE);
+
+        db.close();
+
+        /**
+        mainMarkerPosition = new LatLng(values.latitude,values.longitude);
+        MarkerOptions mOptions = new MarkerOptions().position(new LatLng(values.latitude, values.longitude));
+        articleMap.addMarker(mOptions);
+        */
+        try {
+            lbrsList = new HttpLBRSTask().execute(String.valueOf(values.latitude), String.valueOf(values.longitude)).get();
+
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        Log.d("HASH_LBRS", String.valueOf(lbrsList.size()));
+        if(lbrsList.size() > 0) {
+            for (int i = 0; i < lbrsList.size(); i++) {
+                lbrsHash.put(articleMap.addMarker(
+                                new MarkerOptions().position(new LatLng(lbrsList.get(i).latitude, lbrsList.get(i).longitude))),
+                        String.valueOf(lbrsList.get(i).id));
+
+                Log.d("HASH_LBRS", lbrsList.get(i).latitude + " " + lbrsList.get(i).longitude + " " + lbrsList.get(i).id);
+            }
+        }
+        else {
+            MarkerOptions mOptions = new MarkerOptions().position(new LatLng(values.latitude, values.longitude));
+            articleMap.addMarker(mOptions);
+        }
+
+        viewArticle(values);
+
+
+    }
+
+    public static void dbSelectMarkerByDate (Date date) {
+
+
+       SQLiteDatabase db = helper.getReadableDatabase();
+
+        String sql = "SELECT footprint.* FROM footprint WHERE date = \'" +dateFrame(date) + "\';";
+
+        Cursor result = db.rawQuery(sql, null);
+
+
+        if(result.moveToFirst()) {
+            do {
+                    markerIdHash.put(map.addMarker(new MarkerOptions().position(
+                                    new LatLng(result.getDouble(DB_LATITUDE), result.getDouble(DB_LONGITUDE)))),
+                            String.valueOf(result.getInt(DB_ID)));
+            } while (result.moveToNext());
+        }
+
+        result.close();
+        db.close();
+
+    }
+
+    public boolean dbSelectMarker () {
+
+
+        SQLiteDatabase db = helper.getReadableDatabase();
+
+        String sql = "SELECT footprint.* FROM footprint;";
+        Cursor result = db.rawQuery(sql, null);
+
+        if(result.moveToFirst()) {
+            do {
+                lbrsHash.put(articleMap.addMarker(new MarkerOptions().position(
+                                new LatLng(result.getDouble(DB_LATITUDE), result.getDouble(DB_LONGITUDE)))),
+                        String.valueOf(result.getInt(DB_ID)));
+            } while (result.moveToNext());
+
+        }
+        else {
+            return false;
+        }
+        result.close();
+        db.close();
+        return true;
+    }
+
+    public static void dbInsertPolyline(LatLng latlng) {
+       SQLiteDatabase db = helper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        //db.insert의 매개변수인 values가 ContentValues 변수이므로 그에 맞춤
+        //데이터 삽입은 put을 이용한다.
+
+
+        values.put("date",dateFrame(today));
+        values.put("latitude", latlng.latitude);
+        values.put("longitude", latlng.longitude);
+        db.insert("polyline", null, values);
+        db.close();
+    }
+
+
+    public static void dbSelectPolylineByDate(Date date) {
+
+       SQLiteDatabase db = helper.getReadableDatabase();
+
+        String sql = "SELECT polyline.* FROM polyline WHERE date = \'" + dateFrame(date) + "\' ORDER BY _id ASC;";
+
+        Cursor result = db.rawQuery(sql, null);
+        LatLng latlng;
+
+        if(result!=null) {
+
+            Calendar cal = Calendar.getInstance();
+            cal.set(date.getYear() + 1900, date.getMonth(), date.getDate());
+
+
+            result.moveToFirst();
+            do {
+                latlng = new LatLng(result.getDouble(POLYLINE_LATITUDE),result.getDouble(POLYLINE_LONGITUDE));
+                polylineHash.add(latlng);
+            } while (result.moveToNext());
+            pastPolyOptions.addAll(polylineHash).color(colorSelector(cal));
+            map.addPolyline(pastPolyOptions);
+        }
+
+        result.close();
+        db.close();
+    }
+
+
+    public static void dbDelete(int id) {
+
+       SQLiteDatabase db = helper.getWritableDatabase();
+        db.rawQuery("DELETE FROM footprint WHERE _id = " + id +";",null);
+
+
+    }
+
+    public void dbSelect() {
+       SQLiteDatabase db = helper.getReadableDatabase();
+        //Cursor c = db.query();
+
+    }
+
+    /**
+     * date를 문자열로 출력해주는 메소드
+     * @param date
+     * @return String
+     */
+    public static String dateFrame(Date date) {
+
+        int year = date.getYear();
+        int month = date.getMonth();
+        int day = date.getDate();
+        return String.format("%04d-%02d-%02d", year + 1900, month+1, day);
+    }
+
+
+
+}
