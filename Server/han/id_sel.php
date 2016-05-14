@@ -21,9 +21,13 @@ if (!$db_selected) {
   die ('Can\'t use db : ' . mysql_error());
 }
 mysql_set_charset(utf8);
-$id_select =  16;
 
-$query = "SELECT * FROM footprint WHERE id = $id_select;";
+$id_select = (int)@$_POST["id"];
+
+// Select all the rows in the markers table
+$query = "SELECT footprint . *
+FROM footprint.footprint
+WHERE id = $id_select";
 
 $result = mysql_query($query);
 if (!$result) {

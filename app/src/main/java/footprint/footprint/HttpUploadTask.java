@@ -13,11 +13,9 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 /**
  * 서버 통신 메소드 시작
@@ -46,7 +44,7 @@ public class HttpUploadTask extends AsyncTask<String, String, String> {
         builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
         InputStream inputStream;
         AndroidHttpClient httpClient = AndroidHttpClient.newInstance("Android");
-        HttpPost httpPost = new HttpPost("http://52.79.139.48/dataTest.php");
+        HttpPost httpPost = new HttpPost("http://52.79.139.48/uploadArticle.php");
 
         try {
 
@@ -83,18 +81,10 @@ public class HttpUploadTask extends AsyncTask<String, String, String> {
             Log.d("UPLOAD", "INPUTSTREAM PASS");
 
 
-            BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(inputStream, "utf8"));
-
-            if(bufferedReader.readLine().equals("EXIST")) {
-                Log.d("UPLOAD", "이미 같은 내용의 글이 존재할 때");
-                return "false";
-            }
 
 
 
             inputStream.close();
-            bufferedReader.close();
 
 
 
@@ -112,6 +102,7 @@ public class HttpUploadTask extends AsyncTask<String, String, String> {
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
+
 
     }
 

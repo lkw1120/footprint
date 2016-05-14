@@ -203,15 +203,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMarkerClick(Marker marker) {
 
-                try {
-                    Log.d("LBRS_HASH",lbrsHash.get(marker));
-                    articleData = new HttpGetArticleTask().execute(lbrsHash.get(marker)).get();
+                if(marker.getPosition() != mainMarkerPosition) {
+                    try {
+                        Log.d("LBRS_HASH", lbrsHash.get(marker));
+                        articleData = new HttpGetArticleTask().execute(lbrsHash.get(marker)).get();
 
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    viewArticle(articleData);
                 }
-                viewArticle(articleData);
-
                 return true;
             }
 
@@ -704,6 +705,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void viewArticle(ArticleData values) {
 
+        dbSelectMarker(values);
         //실제 필요한 작업 처리
         articleDateTime.setText(values.date + " " + values.time);
         articleText.setText(values.article);
@@ -716,7 +718,7 @@ public class MainActivity extends AppCompatActivity {
 
         articleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         articleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(values.latitude, values.longitude), 16));
-
+        mainMarkerPosition = new LatLng(values.latitude,values.longitude);
         options.inSampleSize = 4;
 
         if(values.filename != null) {
@@ -730,7 +732,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        dbSelectMarker(values);
+
 
 
     }
@@ -768,6 +770,18 @@ public class MainActivity extends AppCompatActivity {
         values.latitude = gpsLocation[0];
         values.longitude = gpsLocation[1];
 
+        /** 업로드 스레드
+         *
+         */
+        new HttpUploadTask().execute(
+                imageFile.getAbsolutePath(),
+                String.valueOf(0),
+                values.date,
+                values.time,
+                values.article,
+                values.filename,
+                String.valueOf(values.latitude),
+                String.valueOf(values.longitude));
 
 
         //Toast.makeText(this,"DB_INSERT_SUCCESS",Toast.LENGTH_SHORT).show();
@@ -783,18 +797,6 @@ public class MainActivity extends AppCompatActivity {
 
         //업로드 스레드 실행
 
-        /** 업로드 스레드
-         *
-         */
-        new HttpUploadTask().execute(
-                imageFile.getAbsolutePath(),
-                String.valueOf(0),
-                values.date,
-                values.time,
-                values.article,
-                values.filename,
-                String.valueOf(values.latitude),
-                String.valueOf(values.longitude));
 
 
 
@@ -876,6 +878,8 @@ public class MainActivity extends AppCompatActivity {
 
         lbrsHash.clear();
         articleMap.clear();
+
+
         try {
             lbrsList = new HttpLBRSTask().execute(String.valueOf(values.latitude), String.valueOf(values.longitude)).get();
 
@@ -894,8 +898,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         else {
-            MarkerOptions mOptions = new MarkerOptions().position(new LatLng(values.latitude, values.longitude));
-            articleMap.addMarker(mOptions);
+            articleMap.addMarker(new MarkerOptions().position(new LatLng(values.latitude, values.longitude)));
         }
 
         return ;
