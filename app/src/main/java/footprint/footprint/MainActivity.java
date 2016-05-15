@@ -28,6 +28,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -57,10 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private View mainView = null;
     private View articleView = null;
     private View calendarView = null;
-
-    private View mainButtons = null;
-    private View writeButtons = null;
-    private View btnLayout = null;
+    private View buttonView = null;
 
     private TextView articleDateTime = null;
     private TextView articleText = null;
@@ -68,10 +67,13 @@ public class MainActivity extends AppCompatActivity {
     private TextView articleLatitude = null;
     private TextView articleLongitude = null;
 
+    private FloatingActionsMenu writeFab = null;
+    private FloatingActionButton recordOnFab = null;
+    private FloatingActionButton recordOffFab = null;
+    private FloatingActionButton zoomFab = null;
 
-    private Button writeButton = null;
-    private Button recordButton = null;
-    private Button calButton = null;
+    private Button saveButton = null;
+
 
     private static GoogleMap map = null;
     private static SupportMapFragment mapFragment = null;
@@ -101,8 +103,8 @@ public class MainActivity extends AppCompatActivity {
 
     private int polyColor;
 
-    private final static int GPS_TIME_CYCLE = 60000;
-    private final static int GPS_DISTANCE_CYCLE = 5;
+    private final static int GPS_TIME_CYCLE = 10000;
+    private final static int GPS_DISTANCE_CYCLE = 3;
 
     private final static int GO_CAMERA = 1;
     private final static int GO_GALLARY = 2;
@@ -146,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
         //helper.setWriteAheadLoggingEnabled(false);
 
 
+
         //메인 페이지 초기화
         mainView = findViewById(R.id.mainPage);
         mainView.setVisibility(View.VISIBLE);
@@ -155,7 +158,8 @@ public class MainActivity extends AppCompatActivity {
         articleView.setVisibility(View.GONE);
         calendarView = findViewById(R.id.calendar_view);
         calendarView.setVisibility(View.VISIBLE);
-
+        buttonView = findViewById(R.id.buttonPage);
+        mainView.setVisibility(View.VISIBLE);
 
         //글 페이지 초기화
         articleDateTime = (TextView) findViewById(R.id.articleDateTime);
@@ -166,15 +170,72 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
-
         //버튼 초기화
-        btnLayout = findViewById(R.id.btnLayout);
-        btnLayout.setVisibility(View.VISIBLE);
-        mainButtons = findViewById(R.id.btnMainPage);
-        mainButtons.setVisibility(View.VISIBLE);
-        writeButtons = findViewById(R.id.btnWritePage);
-        writeButtons.setVisibility(View.GONE);
+        //줌 팹 버튼 생성
+        zoomFab = (FloatingActionButton) findViewById(R.id.mapZoom);
+        zoomFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                calendarOnOff();
+            }
+        });
+
+        //기록 팹 버튼 생성
+        recordOnFab = (FloatingActionButton) findViewById(R.id.recordOnState);
+        recordOffFab = (FloatingActionButton) findViewById(R.id.recordOffState);
+        recordOnFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                recordOnOff();
+            }
+        });
+        recordOffFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                recordOnOff();
+            }
+        });
+
+
+
+        writeFab = (FloatingActionsMenu) findViewById(R.id.writeFab);
+
+        //글쓰기 팹 메뉴 생성
+        FloatingActionButton goGallary = (FloatingActionButton) findViewById(R.id.goGallary);
+        FloatingActionButton goCamera = (FloatingActionButton) findViewById(R.id.goCamera);
+
+        goGallary.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                writeFab.collapse();
+                Toast.makeText(MainActivity.this ,"GO GALLARY!", Toast.LENGTH_SHORT).show();
+                onNavGallaryPressed();
+
+            }
+        });
+        goCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                writeFab.collapse();
+                Toast.makeText(MainActivity.this ,"GO CAMERA!", Toast.LENGTH_SHORT).show();
+                onNavCameraPressed();
+            }
+        });
+
+
+
+        //글쓰기 버튼 설정
+        saveButton = (Button) findViewById(R.id.saveButton);
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSavePressed();
+            }
+        });
+
+
+
+
 
 
 
@@ -203,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMarkerClick(Marker marker) {
 
-                if(marker.getPosition() != mainMarkerPosition) {
+                if (marker.getPosition() != mainMarkerPosition) {
                     try {
                         Log.d("LBRS_HASH", lbrsHash.get(marker));
                         articleData = new HttpGetArticleTask().execute(lbrsHash.get(marker)).get();
@@ -218,66 +279,8 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        //articleMap.getUiSettings().setAllGesturesEnabled(false);
-
-        //지도를 그림으로 볼지 사진으로 볼지 결정
-
-        //map.getUiSettings().setMyLocationButtonEnabled(false);
-        //map.getUiSettings().setAllGesturesEnabled(false);
-
-
-        recordButton = (Button) findViewById(R.id.trackRecord);
-        writeButton = (Button) findViewById(R.id.goWritePage);
-        calButton = (Button) findViewById(R.id.calendarOn);
-        recordButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                recordOnOff();
-            }
-        });
-        calButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                calendarOnOff();
-            }
-        });
-        writeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                writeView.setVisibility(View.VISIBLE);
-                mainView.setVisibility(View.GONE);
-                writeButtons.setVisibility(View.VISIBLE);
-                mainButtons.setVisibility(View.GONE);
-            }
-        });
-
-
-        //글작성 페이지 세팅
-        Button camButton = (Button) findViewById(R.id.camButton);
-        Button galButton = (Button) findViewById(R.id.galButton);
-        Button savButton = (Button) findViewById(R.id.saveButton);
-        camButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onNavCameraPressed();
-            }
-        });
-        galButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onNavGallaryPressed();
-            }
-        });
-        savButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-        public void onClick(View v) {
-                onSavePressed();
-            }
-        });
-
         imageView = (ImageView) findViewById(R.id.imageView);
         inputText = (EditText) findViewById(R.id.inputText);
-
 
         //글보기 페이지 세팅
 
@@ -287,27 +290,24 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
-
-
     @Override
     public void onBackPressed() {
         if(writeView.getVisibility() == View.VISIBLE)  {
             mainView.setVisibility(View.VISIBLE);
             writeView.setVisibility(View.GONE);
-            mainButtons.setVisibility(View.VISIBLE);
-            writeButtons.setVisibility(View.GONE);
+            buttonView.setVisibility(View.VISIBLE);
             writeViewReset();
         }
         else if(articleView.getVisibility()==View.VISIBLE) {
             mainView.setVisibility(View.VISIBLE);
             articleView.setVisibility(View.GONE);
-            mainButtons.setVisibility(View.VISIBLE);
-            btnLayout.setVisibility(View.VISIBLE);
+            buttonView.setVisibility(View.VISIBLE);
             writeViewReset();
         }
-        else{
-
+        else if(calendarView.getVisibility()==View.GONE) {
+            calendarView.setVisibility(View.VISIBLE);
+        }
+        else {
             //db_delete();
             super.onBackPressed();
             //임시용
@@ -325,19 +325,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    public void goWritePage() {
+        writeView.setVisibility(View.VISIBLE);
+        mainView.setVisibility(View.GONE);
+        buttonView.setVisibility(View.GONE);
+
+    }
+
+
     public void goArticlePage() {
         if(writeView.getVisibility() == View.VISIBLE){
             InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(inputText.getWindowToken(), 0);
             articleView.setVisibility(View.VISIBLE);
             writeView.setVisibility(View.GONE);
-            btnLayout.setVisibility(View.VISIBLE);
-            writeButtons.setVisibility(View.GONE);
+
+            //글쓰기 페이지에서는 팹버튼들이 이미 숨겨져있으므로 다시 숨길 필요가 없다
+
         }
         else {
             articleView.setVisibility(View.VISIBLE);
-            btnLayout.setVisibility(View.GONE);
             mainView.setVisibility(View.GONE);
+            buttonView.setVisibility(View.GONE);
+
+
+
         }
     }
 
@@ -473,6 +485,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(intent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(intent, GO_CAMERA);
+
         }
     }
 
@@ -519,6 +532,8 @@ public class MainActivity extends AppCompatActivity {
 
                 //화면에 뿌리기
                 imageView.setImageBitmap(bitmap);
+
+                goWritePage();
             }
             else if (requestCode == GO_GALLARY) {
                 try {
@@ -541,9 +556,7 @@ public class MainActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                Toast.makeText(this, "이미지 불러왔음", Toast.LENGTH_SHORT).show();
-
-                //이미지 불러와서 넣기
+                goWritePage();
             }
             else {
                 Toast.makeText(this, "Activity is canceled",Toast.LENGTH_SHORT).show();
@@ -554,6 +567,7 @@ public class MainActivity extends AppCompatActivity {
         }
         else {
             super.onActivityResult(requestCode, resultCode, data);
+
         }
 
 
@@ -680,23 +694,23 @@ public class MainActivity extends AppCompatActivity {
 
     public void recordOnOff() {
         if(recordOn) {
-            recordButton.setText("RECORD");
+            recordOffFab.setVisibility(View.VISIBLE);
+            recordOnFab.setVisibility(View.GONE);
             recordOn = false;
         }
         else {
-            recordButton.setText("RECORDED");
+            recordOnFab.setVisibility(View.VISIBLE);
+            recordOffFab.setVisibility(View.GONE);
             recordOn = true;
         }
 
     }
     public void calendarOnOff() {
         if(calendarOn) {
-            calButton.setText("OFF");
             calendarView.setVisibility(View.GONE);
             calendarOn = false;
         }
         else {
-            calButton.setText("ON");
             calendarView.setVisibility(View.VISIBLE);
             calendarOn = true;
         }

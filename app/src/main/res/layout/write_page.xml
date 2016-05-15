@@ -28,10 +28,19 @@
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/image_upload" />
 
-            <EditText
-                android:id="@+id/inputText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+
+
+                <EditText
+                    android:id="@+id/inputText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+
+                <Button
+                    android:id="@+id/saveButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="save"/>
+
 
         </LinearLayout>
 
