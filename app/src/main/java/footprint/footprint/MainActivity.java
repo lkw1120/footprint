@@ -419,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
                 LatLng latlng = new LatLng(latitude, longitude);
                 pOptions.add(latlng).color(polyColor);
 
-                dbInsertPolyline(latlng);
+                //dbInsertPolyline(latlng);
                 if(dateFrame(CalendarView.selectedDateInfo).equals(dateFrame(today))) {
 
                     map.addPolyline(pOptions);
