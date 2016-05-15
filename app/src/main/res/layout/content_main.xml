@@ -18,13 +18,23 @@
         android:layout_height="wrap_content"
         calendarNS:dateFormat="MMMM yyyy"/>
 
-
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     <fragment
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         class="com.google.android.gms.maps.SupportMapFragment" />
+
+        <View
+            android:id="@+id/shadowBar"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@drawable/drop_shadow" >
+        </View>
+    </RelativeLayout>
 
 
     <!---->

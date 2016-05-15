@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
     private final static int POLYLINE_LONGITUDE = 3;
 
     private boolean recordOn = false;
-    private boolean calendarOn = true;
+    private boolean zoomOn = true;
     private boolean lbrsChecker = false;
     protected static boolean getArticleFinish = false;
     protected static boolean lbrsFinish = false;
@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         zoomFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                calendarOnOff();
+                zoomOnOff();
             }
         });
 
@@ -705,14 +705,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-    public void calendarOnOff() {
-        if(calendarOn) {
+    public void zoomOnOff() {
+        if(zoomOn) {
             calendarView.setVisibility(View.GONE);
-            calendarOn = false;
+            findViewById(R.id.shadowBar).setVisibility(View.GONE);
+            zoomOn = false;
         }
         else {
             calendarView.setVisibility(View.VISIBLE);
-            calendarOn = true;
+            findViewById(R.id.shadowBar).setVisibility(View.VISIBLE);
+            zoomOn = true;
         }
     }
 
@@ -903,6 +905,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d("HASH_LBRS", String.valueOf(lbrsList.size()));
         if(lbrsList.size() > 0) {
+
             for (int i = 0; i < lbrsList.size(); i++) {
                 lbrsHash.put(articleMap.addMarker(
                                 new MarkerOptions().position(new LatLng(lbrsList.get(i).latitude, lbrsList.get(i).longitude))),
