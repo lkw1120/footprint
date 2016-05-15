@@ -21,7 +21,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -52,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     //변수는 여기에서(?)
-    private WebView webView = null;
+    //private WebView webView = null;
 
     private View writeView = null;
     private View mainView = null;
