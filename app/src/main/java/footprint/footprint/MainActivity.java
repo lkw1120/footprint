@@ -1,5 +1,7 @@
 package footprint.footprint;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -134,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
     private LatLng mainMarkerPosition = null;
     private static Date today = new Date();
 
+    private NotificationManager notiManager = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -242,6 +245,8 @@ public class MainActivity extends AppCompatActivity {
         //맵 초기화
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
+        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
         //마커 클릭 이벤트 설정
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
@@ -309,7 +314,7 @@ public class MainActivity extends AppCompatActivity {
         }
         else {
             //db_delete();
-            super.onBackPressed();
+            //super.onBackPressed();
             //임시용
         }
 
@@ -370,8 +375,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         LatLng startPoint = new LatLng(37.449627,126.653116);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint,16));
-
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 16));
         // 위치 정보를 받을 리스너 생성
         gpsListener = new GPSListener();
         long minTime = GPS_TIME_CYCLE;
@@ -426,6 +430,12 @@ public class MainActivity extends AppCompatActivity {
             Log.i("GPSListener", msg);
             //String accuracy = "정확도 : " + location.getAccuracy();
 
+            //지도에 내 위치 표시
+            try {
+                map.setMyLocationEnabled(true);
+            } catch (SecurityException ex) {
+                ex.printStackTrace();
+            }
 
             if (location.getAccuracy() < 50.0 && recordOn) {
 
@@ -433,34 +443,24 @@ public class MainActivity extends AppCompatActivity {
                 LatLng latlng = new LatLng(latitude, longitude);
                 pOptions.add(latlng).color(polyColor);
 
-                //dbInsertPolyline(latlng);
+                dbInsertPolyline(latlng);
                 if(dateFrame(CalendarView.selectedDateInfo).equals(dateFrame(today))) {
-
                     map.addPolyline(pOptions);
+                    if (!zoomOn) {
+                        showCurrentLocation(latitude, longitude);
+                    }
                 }
-
             }
 
 
-            //지도에 내 위치 표시
-            try {
-                map.setMyLocationEnabled(true);
-            } catch (SecurityException ex) {
-                ex.printStackTrace();
-            }
-            showCurrentLocation(latitude, longitude);
+
         }
         /**
          * 현 위치를 중심으로 화면에 지도를 띄워주는 메소드
          */
         private void showCurrentLocation(Double latitude, Double longitude) {
             LatLng curPoint = new LatLng(latitude, longitude);
-            if (dateFrame(CalendarView.selectedDateInfo).equals(dateFrame(today))) {
-
-                map.animateCamera(CameraUpdateFactory.newLatLng(curPoint));
-            }
-            //지도를 그림으로 볼지 사진으로 볼지 결정
-            map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            map.animateCamera(CameraUpdateFactory.newLatLng(curPoint));
 
         }
 
@@ -713,11 +713,13 @@ public class MainActivity extends AppCompatActivity {
         if(zoomOn) {
             calendarView.setVisibility(View.GONE);
             findViewById(R.id.shadowBar).setVisibility(View.GONE);
+            onBtnNotification();
             zoomOn = false;
         }
         else {
             calendarView.setVisibility(View.VISIBLE);
             findViewById(R.id.shadowBar).setVisibility(View.VISIBLE);
+            notiManager.cancel(1);
             zoomOn = true;
         }
     }
@@ -973,7 +975,7 @@ public class MainActivity extends AppCompatActivity {
     public static void dbDelete(int id) {
 
        SQLiteDatabase db = helper.getWritableDatabase();
-        db.rawQuery("DELETE FROM footprint WHERE _id = " + id +";",null);
+        db.rawQuery("DELETE FROM footprint WHERE _id = " + id + ";", null);
 
 
     }
@@ -994,9 +996,47 @@ public class MainActivity extends AppCompatActivity {
         int year = date.getYear();
         int month = date.getMonth();
         int day = date.getDate();
-        return String.format("%04d-%02d-%02d", year + 1900, month+1, day);
+        return String.format("%04d-%02d-%02d", year + 1900, month+1,day);
     }
 
 
+
+
+
+
+    /**
+     * 기록중 노티바 띄우기
+     */
+    public void onBtnNotification() {
+        //알림(Notification)을 관리하는 NotificationManager 얻어오기
+        notiManager= (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+
+
+        //알림(Notification)을 만들어내는 Builder 객체 생성
+        //API 11 버전 이하도 지원하기 위해 NotificationCampat 클래스 사용
+        //만약 minimum SDK가 API 11 이상이면 Notification 클래스 사용 가능
+        Notification.Builder builder = new Notification.Builder(this);
+
+        //Notification.Builder에게 Notification 제목, 내용, 이미지 등을 설정//////////////////////////////////////
+
+        builder.setSmallIcon(R.drawable.ic_app);//상태표시줄에 보이는 아이콘 모양
+        builder.setTicker("FootPrint"); //알림이 발생될 때 잠시 보이는 글씨
+
+        //상태바를 드래그하여 아래로 내리면 보이는 알림창(확장 상태바)의 아이콘 모양 지정
+        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_app));
+
+        builder.setContentTitle("FootPrint");    //알림창에서의 제목
+        builder.setContentText("경로 추적중입니다");   //알림창에서의 글씨
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        Notification notification= builder.build();   //Notification 객체 생성
+
+        notification.flags |= Notification.FLAG_NO_CLEAR;
+
+        notiManager.notify(1, notification);             //NotificationManager가 알림(Notification)을 표시
+
+    }
+    
 
 }
