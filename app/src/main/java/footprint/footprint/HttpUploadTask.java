@@ -30,6 +30,9 @@ import java.io.InputStream;
  *
  * http://derveljunit.tistory.com/5 참조
  *
+ * 이미지 리사이징 관련글
+ * http://chiyo85.tistory.com/entry/Android-Bitmap-Object-Resizing-Tip
+ *
  *
  */
 public class HttpUploadTask extends AsyncTask<String, String, String> {

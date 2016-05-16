@@ -17,6 +17,7 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
@@ -25,7 +26,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,6 +43,9 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -65,14 +68,15 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView articleDateTime = null;
     private TextView articleText = null;
-    private ImageButton articleImageButton = null;
     private TextView articleLatitude = null;
     private TextView articleLongitude = null;
+    private ImageView articleImageView = null;
 
     private FloatingActionsMenu writeFab = null;
     private FloatingActionButton recordOnFab = null;
     private FloatingActionButton recordOffFab = null;
     private FloatingActionButton zoomFab = null;
+    private FloatingActionButton goMainFab = null;
 
     private Button saveButton = null;
 
@@ -91,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
     protected static SupportMapFragment articleMapFragment;
     protected static GoogleMap articleMap;
 
+
     protected static HashMap<Object,String> markerIdHash = new HashMap<>();
     protected static LinkedList<LatLng> polylineHash = new LinkedList<>();
     protected static LinkedList<LBRS> lbrsList = null;
@@ -105,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int polyColor;
 
-    private final static int GPS_TIME_CYCLE = 10000;
+    private final static int GPS_TIME_CYCLE = 1000;
     private final static int GPS_DISTANCE_CYCLE = 3;
 
     private final static int GO_CAMERA = 1;
@@ -126,9 +131,6 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean recordOn = false;
     private boolean zoomOn = true;
-    private boolean lbrsChecker = false;
-    protected static boolean getArticleFinish = false;
-    protected static boolean lbrsFinish = false;
 
     private static DBOpenHelper helper;
 
@@ -144,12 +146,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         startActivity(new Intent(this, PreLoadActivity.class));
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        /**
-         * DB 설정
-         */
+
+        //DB 설정
         helper = new DBOpenHelper(this, "footprint.db", null, 1);
         //helper.setWriteAheadLoggingEnabled(false);
-
 
 
         //메인 페이지 초기화
@@ -164,13 +164,13 @@ public class MainActivity extends AppCompatActivity {
         buttonView = findViewById(R.id.buttonPage);
         mainView.setVisibility(View.VISIBLE);
 
+
         //글 페이지 초기화
         articleDateTime = (TextView) findViewById(R.id.articleDateTime);
         articleText = (TextView) findViewById(R.id.articleText);
-        articleImageButton = (ImageButton) findViewById(R.id.articleImageButton);
+        articleImageView = (ImageView) findViewById(R.id.articleImageView);
         articleLatitude = (TextView) findViewById(R.id.articleLatitude);
         articleLongitude = (TextView) findViewById(R.id.articleLongitude);
-
 
 
         //버튼 초기화
@@ -180,6 +180,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 zoomOnOff();
+            }
+        });
+
+        //메인페이지 가는 팹 버튼 생성
+        goMainFab = (FloatingActionButton) findViewById(R.id.goMainFab);
+        goMainFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
             }
         });
 
@@ -199,11 +208,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
-        writeFab = (FloatingActionsMenu) findViewById(R.id.writeFab);
-
         //글쓰기 팹 메뉴 생성
+        writeFab = (FloatingActionsMenu) findViewById(R.id.writeFab);
         FloatingActionButton goGallary = (FloatingActionButton) findViewById(R.id.goGallary);
         FloatingActionButton goCamera = (FloatingActionButton) findViewById(R.id.goCamera);
 
@@ -211,21 +217,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 writeFab.collapse();
-                Toast.makeText(MainActivity.this ,"GO GALLARY!", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this ,"GO GALLARY!", Toast.LENGTH_SHORT).show();
                 onNavGallaryPressed();
-
             }
         });
         goCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 writeFab.collapse();
-                Toast.makeText(MainActivity.this ,"GO CAMERA!", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this ,"GO CAMERA!", Toast.LENGTH_SHORT).show();
                 onNavCameraPressed();
             }
         });
-
-
 
         //글쓰기 버튼 설정
         saveButton = (Button) findViewById(R.id.saveButton);
@@ -236,12 +239,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
-
-
-
-
         //맵 초기화
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
@@ -251,7 +248,6 @@ public class MainActivity extends AppCompatActivity {
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-
                 dbSelectArticle(markerIdHash.get(marker));
                 goArticlePage();
                 return true;
@@ -284,11 +280,9 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+
         imageView = (ImageView) findViewById(R.id.imageView);
         inputText = (EditText) findViewById(R.id.inputText);
-
-        //글보기 페이지 세팅
-
 
     }
 
@@ -373,9 +367,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "어플리케이션을 이용하기 위해서는 GPS를 활성화해야합니다.", Toast.LENGTH_SHORT).show();
             startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
         }
-
-        LatLng startPoint = new LatLng(37.449627,126.653116);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 16));
+        //스타팅포인트는 학교 좌표
         // 위치 정보를 받을 리스너 생성
         gpsListener = new GPSListener();
         long minTime = GPS_TIME_CYCLE;
@@ -408,7 +400,8 @@ public class MainActivity extends AppCompatActivity {
             ex.printStackTrace();
         }
 
-
+        LatLng startPoint = new LatLng(latitude,longitude);
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 16));
         //Toast.makeText(getApplicationContext(), "위치 확인이 시작되었습니다. 로그를 확인하세요.", Toast.LENGTH_SHORT).show();
 
     }
@@ -420,6 +413,7 @@ public class MainActivity extends AppCompatActivity {
         /**
          * 위치 정보가 확인될 때 자동 호출되는 메소드
          */
+
         public void onLocationChanged(Location location) {
 
             latitude = location.getLatitude();
@@ -448,12 +442,10 @@ public class MainActivity extends AppCompatActivity {
                 if(dateFrame(CalendarView.selectedDateInfo).equals(dateFrame(today))) {
                     map.addPolyline(pOptions);
                 }
-                if (dateFrame(CalendarView.selectedDateInfo).equals(dateFrame(today)) && !zoomOn) {
-                    showCurrentLocation(latitude, longitude);
-                }
+
             }
 
-
+            showCurrentLocation(latitude, longitude);
 
         }
         /**
@@ -462,11 +454,9 @@ public class MainActivity extends AppCompatActivity {
         private void showCurrentLocation(Double latitude, Double longitude) {
             LatLng curPoint = new LatLng(latitude, longitude);
             map.animateCamera(CameraUpdateFactory.newLatLng(curPoint));
-
         }
 
         public void onProviderDisabled(String provider) {
-
         }
 
         public void onProviderEnabled(String provider) {
@@ -482,15 +472,12 @@ public class MainActivity extends AppCompatActivity {
      *  카메라를 선택하면 동작하는 메소드
      */
     public void onNavCameraPressed() {
-
         String path = Environment.getExternalStorageDirectory()+"/DCIM/Camera/temp_image.jpg";
         imageFile = new File(path);
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(imageFile));
-
         if(intent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(intent, GO_CAMERA);
-
         }
     }
 
@@ -516,7 +503,7 @@ public class MainActivity extends AppCompatActivity {
             if (requestCode == GO_CAMERA) {
                 //카메라 촬영 선택했을 경우
 
-                Toast.makeText(this,"후처리 시작",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this,"후처리 시작",Toast.LENGTH_SHORT).show();
                 //임시로 생성한 이미지 이름을 다시 변경
                 imageRename();
 
@@ -543,7 +530,6 @@ public class MainActivity extends AppCompatActivity {
             else if (requestCode == GO_GALLARY) {
                 try {
                     //Uri에서 이미지 이름을 얻어온다.
-                    //String name_Str = getImageNameToUri(data.getData());
                     imageFile = new File(getPath(data.getData()));
 
                     //이미지 데이터를 비트맵으로 받아온다.
@@ -566,13 +552,9 @@ public class MainActivity extends AppCompatActivity {
             else {
                 Toast.makeText(this, "Activity is canceled",Toast.LENGTH_SHORT).show();
             }
-
-            //Toast.makeText(this , imageFile.getAbsolutePath() , Toast.LENGTH_SHORT).show();
-
         }
         else {
             super.onActivityResult(requestCode, resultCode, data);
-
         }
 
 
@@ -601,12 +583,8 @@ public class MainActivity extends AppCompatActivity {
 
         String fileRename;
         fileRename = exif.getAttribute(TAG_DATETIME);
-
-        //Toast.makeText(this,exif.getAttribute(TAG_DATETIME),Toast.LENGTH_SHORT).show();
-
         fileRename = fileRename.replace(":", "");
         fileRename = fileRename.replace(" ", "_");
-        //Toast.makeText(this,fileRename,Toast.LENGTH_LONG).show();
         File imageNameOrigin =
                 new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
                         "/DCIM/Camera/", "temp_image.jpg");
@@ -614,7 +592,6 @@ public class MainActivity extends AppCompatActivity {
                 new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
                         "/DCIM/Camera/", fileRename + ".jpg");
 
-        //Toast.makeText(this,imageNameChanged.getAbsolutePath(),Toast.LENGTH_LONG).show();
         imageNameOrigin.renameTo(imageNameChanged);
         imageFile = imageNameChanged;
         //exif = null;
@@ -653,7 +630,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
 
     /**
      * 요일마다 색깔을 다르게 구분
@@ -745,18 +721,26 @@ public class MainActivity extends AppCompatActivity {
         if(values.filename != null) {
             String filePath = Environment.getExternalStorageDirectory()+"/DCIM/Camera/" + values.filename;
             imageFile = new File(filePath);
+            Bitmap bitmap = null;
+            if(imageFile.exists()) {
+                //이미지 데이터를 비트맵으로 받아온다.
+                bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
+                //화면에 뿌리기
+            }
+            else {
+                try {
+                    bitmap = new HttpImageDownTask().execute(values.filename).get();
 
-            //이미지 데이터를 비트맵으로 받아온다.
-            Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
-            //화면에 뿌리기
-            articleImageButton.setImageBitmap(bitmap);
+                }catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            articleImageView.setImageBitmap(bitmap);
+
         }
 
-
-
-
-
     }
+
 
     /**
      * 데이터베이스 SQL 설정
@@ -816,31 +800,17 @@ public class MainActivity extends AppCompatActivity {
 
         db.close();
 
-        //업로드 스레드 실행
-
-
-
-
     }
 
     public void dbSelectArticle(String idCode) {
 
-
-        ArticleData values = new ArticleData();
-
-
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor result;
 
-        /**
-         * idCode에 서버DB와 내부DB를 구분하는 정보를 넣어서 분리처리할 것
-         *
-         */
-
+        ArticleData values = new ArticleData();
 
         if(idCode == null) {
             result = db.rawQuery("SELECT footprint.* FROM footprint;", null);
-
         }
         else {
             result = db.rawQuery("SELECT footprint.* FROM footprint WHERE _id = " + Integer.parseInt(idCode) + ";",null);
@@ -848,7 +818,7 @@ public class MainActivity extends AppCompatActivity {
         result.moveToLast();
         Log.d("ARTICLE", "DB_SEARCH_SUCCESS!");
         Log.d("ID_MATCH", idCode + " " + result.getInt(DB_ID));
-        //while (!result.isAfterLast()){
+
 
         values.id = result.getInt(DB_ID);
         values.date = result.getString(DB_DATE);
@@ -860,15 +830,7 @@ public class MainActivity extends AppCompatActivity {
 
         db.close();
 
-        /**
-        mainMarkerPosition = new LatLng(values.latitude,values.longitude);
-        MarkerOptions mOptions = new MarkerOptions().position(new LatLng(values.latitude, values.longitude));
-        articleMap.addMarker(mOptions);
-        */
-
-
         viewArticle(values);
-
 
     }
 

@@ -43,7 +43,6 @@ public class HttpLBRSTask extends AsyncTask<String, String, LinkedList<LBRS>> {
 
         try {
 
-
             Log.d("LBRS", "SETMODE PASS");
             builder.addTextBody("latitude", values[0], ContentType.create("Multipart/related", "utf8"));
             builder.addTextBody("longitude", values[1], ContentType.create("Multipart/related", "utf8"));
