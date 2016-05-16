@@ -12,12 +12,12 @@ import java.net.URL;
 
 public class HttpImageDownTask extends AsyncTask<String, Integer, Bitmap> {
     @Override
-    protected Bitmap doInBackground(String... urls) {
+    protected Bitmap doInBackground(String... filename) {
         // TODO Auto-generated method stub
         Bitmap downloadImage = null;
         try{
-            URL myFileUrl = new URL("http://52.79.139.48/imageStorage/" + urls[0]);
-            Log.d("FILEDOWN", urls[0]);
+            URL myFileUrl = new URL("http://52.79.139.48/imageStorage/" + filename[0]);
+            Log.d("FILEDOWN", filename[0]);
             HttpURLConnection conn = (HttpURLConnection)myFileUrl.openConnection();
             conn.setDoInput(true);
             conn.connect();
