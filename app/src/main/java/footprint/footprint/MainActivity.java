@@ -713,13 +713,11 @@ public class MainActivity extends AppCompatActivity {
         if(zoomOn) {
             calendarView.setVisibility(View.GONE);
             findViewById(R.id.shadowBar).setVisibility(View.GONE);
-            onBtnNotification();
             zoomOn = false;
         }
         else {
             calendarView.setVisibility(View.VISIBLE);
             findViewById(R.id.shadowBar).setVisibility(View.VISIBLE);
-            notiManager.cancel(1);
             zoomOn = true;
         }
     }
@@ -1037,6 +1035,6 @@ public class MainActivity extends AppCompatActivity {
         notiManager.notify(1, notification);             //NotificationManager가 알림(Notification)을 표시
 
     }
-    
+
 
 }
