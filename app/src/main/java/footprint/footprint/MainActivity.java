@@ -369,6 +369,8 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
         }
 
+        LatLng startPoint = new LatLng(37.449627,126.653116);
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint,16));
 
         // 위치 정보를 받을 리스너 생성
         gpsListener = new GPSListener();
@@ -453,8 +455,10 @@ public class MainActivity extends AppCompatActivity {
          */
         private void showCurrentLocation(Double latitude, Double longitude) {
             LatLng curPoint = new LatLng(latitude, longitude);
-            //map.animateCamera(CameraUpdateFactory.newLatLngZoom(curPoint, 16));
+            if (dateFrame(CalendarView.selectedDateInfo).equals(dateFrame(today))) {
 
+                map.animateCamera(CameraUpdateFactory.newLatLng(curPoint));
+            }
             //지도를 그림으로 볼지 사진으로 볼지 결정
             map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
