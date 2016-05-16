@@ -44,7 +44,7 @@ public class HttpUploadTask extends AsyncTask<String, String, String> {
         builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
         InputStream inputStream;
         AndroidHttpClient httpClient = AndroidHttpClient.newInstance("Android");
-        HttpPost httpPost = new HttpPost("http://52.79.139.48/uploadArticle.php");
+        HttpPost httpPost = new HttpPost("http://52.79.139.48/dataTest.php");
 
         try {
 

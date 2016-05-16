@@ -437,18 +437,19 @@ public class MainActivity extends AppCompatActivity {
                 ex.printStackTrace();
             }
 
-            if (location.getAccuracy() < 50.0 && recordOn) {
+            if (location.getAccuracy() < 50.0) {
 
                 pOptions.geodesic(true);
                 LatLng latlng = new LatLng(latitude, longitude);
                 pOptions.add(latlng).color(polyColor);
-
-                dbInsertPolyline(latlng);
+                if(recordOn) {
+                    dbInsertPolyline(latlng);
+                }
                 if(dateFrame(CalendarView.selectedDateInfo).equals(dateFrame(today))) {
                     map.addPolyline(pOptions);
-                    if (!zoomOn) {
-                        showCurrentLocation(latitude, longitude);
-                    }
+                }
+                if (dateFrame(CalendarView.selectedDateInfo).equals(dateFrame(today)) && !zoomOn) {
+                    showCurrentLocation(latitude, longitude);
                 }
             }
 
