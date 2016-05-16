@@ -18,13 +18,9 @@ mysql_connect($mysql_hostname, $mysql_username, $mysql_password);
 mysql_select_db($mysql_database);
 mysql_set_charset("utf8");
 
- mysql_query("INSERT INTO table1 (name , images1)
-              VALUES ('8','asd.jpg');");
 
 
-//if(!empty(@$_POST["id"])) {
-
-
+  $id = @$_POST["id"];
   $date = @$_POST["date"];
   $time = @$_POST["time"];
   $article = @$_POST["article"];;
@@ -32,44 +28,16 @@ mysql_set_charset("utf8");
   $latitude = @$_POST["latitude"];
   $longitude = @$_POST["longitude"];
 
-/*
-  $result = mysql_query("SELECT footprint.* FROM footprint WHERE
-                        writeDate = '$date',
-                        wrtieTime = '$time',
-                        latitude = '$latitude',
-                        longitude = '$longitude';");
-  if(E$result) {
-    mysql_close($connect);
-    echo "EXIST";
-    die;
-  }
-*/
-
-  $file_path = "/home/ubuntu/html/imageStorage/";
-  $file_path = $file_path . basename($_FILES["filename"]["name"]);
+    $file_path = "/home/ubuntu/html/imageStorage/";
+    $file_path = $file_path . basename($_FILES["image"]["name"]);
+    move_uploaded_file($_FILES["image"]["tmp_name"], $file_path);
 
 
+    mysql_query("INSERT INTO footprint (writeDate, writeTime, article, filename, latitude, longitude)
+                  VALUES ('$date', '$time', '$article','$filename', '$latitude', '$longitude');");
 
-    if(move_uploaded_file($_FILES["filename"]["tmp_name"], $file_path)) {
+   mysql_query("DELETE FROM footprint WHERE latitude=0 and longitude=0;");
 
-        echo "success";
-    } else{
-        echo "fail";
-    }
-
-
-  mysql_query("INSERT INTO footprint (writeDate, writeTime, article, filename, latitude, longitude)
-              VALUES ('$date', '$time', '$article','$filename', '$latitude', '$longitude');");
-/*}
-    else{
-echo "false";
-
-    }
-*/
-
-print_r($date);
-
-echo "asd";
 
 mysql_close($connect);
 

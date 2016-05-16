@@ -6,11 +6,6 @@
     android:background="@color/white">
 
 
-    <fragment
-        android:id="@+id/articleMap"
-        android:layout_width="match_parent"
-        android:layout_height="240dp"
-        class="com.google.android.gms.maps.SupportMapFragment" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -24,9 +19,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
+                <fragment
+                    android:id="@+id/articleMap"
+                    android:layout_width="match_parent"
+                    android:layout_height="240dp"
+                    class="com.google.android.gms.maps.SupportMapFragment" />
+
+                <!--
                 <View
+                    android:id="@+id/mapCoverEmptyView"
                     android:layout_width="match_parent"
                     android:layout_height="240dp"/>
+                -->
 
                 <TextView
                     android:id="@+id/articleDateTime"

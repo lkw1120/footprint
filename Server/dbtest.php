@@ -1,31 +1,25 @@
+
 <?php
+if(isset($_FILES['file'])){
+$file_name = $_FILES['file']['name'];
+$tmp_name = $_FILES['file']["tmp_name"];
+$local_image = "imageStorage/";
+$r = move_uploaded_file($tmp_name,$local_image.$name_file);
 
- 
-
-$connect = mysql_connect('localhost','footprint','vntvmflsxm') or die("Failed");;
-
-$db = mysql_select_db('footprint', $connect);
-
-
-
-if($db)
-{
- echo "ssss";
+print_r($r);
 
 }
 
-$sql = "SHOW TABLES FROM image";
-$result = mysql_query($sql);
-/*
-$sql = "INSERT INTO image VALUES";
-$sql = $sql."('3.PNG')";
-mysql_query($sql, $connect);
 
-$sql = "INSERT INTO image VALUES";
-$sql = $sql."('4.PNG')";
-mysql_query($sql, $connect);
-*/
-print_r($result);
 
 
 ?>
+
+
+<form method="post" enctype="multipart">
+
+<input type="file" name="file" /><br/><br/>
+
+<input type="submit" name="submit" value="upload"/>
+
+</form>

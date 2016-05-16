@@ -28,7 +28,10 @@ public class HttpLBRSTask extends AsyncTask<String, String, LinkedList<LBRS>> {
      * @return
      */
 
-
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+    }
 
     @Override
     protected LinkedList<LBRS> doInBackground(String... values) {
@@ -75,8 +78,7 @@ public class HttpLBRSTask extends AsyncTask<String, String, LinkedList<LBRS>> {
             int id;
             double lati;
             double longi;
-
-            int m = 0;
+            //int cnt;
 
             String line;
 
@@ -88,7 +90,7 @@ public class HttpLBRSTask extends AsyncTask<String, String, LinkedList<LBRS>> {
                     id = Integer.parseInt(line.substring(0, (i = line.indexOf(","))));
                     lati = Double.parseDouble(line.substring(i + 1, (j = line.indexOf(",", i + 1))));
                     longi = Double.parseDouble(line.substring(j + 1, (k = line.indexOf(";", j + 1))));
-
+                    //cnt = Integer.parseInt(line.substring()) ???
 
 
                     Log.d("BUFFERLINE", id + " " + lati + " " + longi);
@@ -109,8 +111,6 @@ public class HttpLBRSTask extends AsyncTask<String, String, LinkedList<LBRS>> {
 
             }
 
-            inputStream.close();
-            bufferedReader.close();
 
             Log.d("LBRS", "SUCCESS_FUNCTION");
             return receiveData;

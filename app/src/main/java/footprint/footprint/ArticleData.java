@@ -12,6 +12,7 @@ public class ArticleData {
     protected String filename = null;
     protected double latitude = 0.0f;
     protected double longitude = 0.0f;
+    //protected int cnt = 0;
 
 
     public ArticleData() {

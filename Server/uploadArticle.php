@@ -30,6 +30,23 @@ mysql_set_charset("utf8");
   $latitude = @$_POST["latitude"];
   $longitude = @$_POST["longitude"];
 
+
+
+
+$uploaddir = "/home/ubuntu/html/imageStorage/";
+$uploadfile = $uploaddir . basename($_FILES['userfile']['name']);
+  
+print_r($uploadfile); 
+
+    if(move_uploaded_file($_FILES["userfile"]["tmp_name"], $uploadfile)) {
+
+        echo "success";
+    } else{
+        echo "fail";
+    }
+   
+
+
 /*
   $result = mysql_query("SELECT footprint.* FROM footprint WHERE
                         writeDate = '$date',

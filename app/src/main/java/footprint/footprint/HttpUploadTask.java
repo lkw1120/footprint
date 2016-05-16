@@ -35,9 +35,12 @@ import java.io.InputStream;
  *
  *
  */
-public class HttpUploadTask extends AsyncTask<String, String, String> {
+public class HttpUploadTask extends AsyncTask<String, Integer, String> {
 
-
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+    }
     @Override
     protected String doInBackground(String... values) {
         // TODO Auto-generated method stub
@@ -47,20 +50,19 @@ public class HttpUploadTask extends AsyncTask<String, String, String> {
         builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
         InputStream inputStream;
         AndroidHttpClient httpClient = AndroidHttpClient.newInstance("Android");
-        HttpPost httpPost = new HttpPost("http://52.79.139.48/dataTest.php");
+        HttpPost httpPost = new HttpPost("http://52.79.139.48/uploadArticle.php");
 
         try {
 
             Log.d("UPLOAD", "SETMODE PASS");
             builder.addPart("image", new FileBody(new File(values[0])));
-            builder.addTextBody("id",values[1], ContentType.create("Multipart/related", "utf8"));
+            builder.addTextBody("id", values[1], ContentType.create("Multipart/related", "utf8"));
             builder.addTextBody("date", values[2], ContentType.create("Multipart/related", "utf8"));
             builder.addTextBody("time", values[3], ContentType.create("Multipart/related", "utf8"));
             builder.addTextBody("article", values[4], ContentType.create("Multipart/related", "utf8"));
             builder.addTextBody("filename", values[5], ContentType.create("Multipart/related", "utf8"));
             builder.addTextBody("latitude", values[6], ContentType.create("Multipart/related", "utf8"));
             builder.addTextBody("longitude", values[7], ContentType.create("Multipart/related", "utf8"));
-
 
             Log.d("UPLOAD", "ADDTEXT PASS");
 
@@ -86,13 +88,11 @@ public class HttpUploadTask extends AsyncTask<String, String, String> {
 
 
 
-
             inputStream.close();
 
 
 
-
-            } catch (ClientProtocolException e) {
+        } catch (ClientProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -105,7 +105,6 @@ public class HttpUploadTask extends AsyncTask<String, String, String> {
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
-
 
     }
 

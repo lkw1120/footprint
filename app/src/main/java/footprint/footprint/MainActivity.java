@@ -61,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
     private View articleView = null;
     private View calendarView = null;
     private View buttonView = null;
+    protected static View progressView = null;
+    protected static View progressBar = null;
 
     private TextView articleDateTime = null;
     private TextView articleText = null;
@@ -159,7 +161,10 @@ public class MainActivity extends AppCompatActivity {
         calendarView = findViewById(R.id.calendar_view);
         calendarView.setVisibility(View.VISIBLE);
         buttonView = findViewById(R.id.buttonPage);
-        mainView.setVisibility(View.VISIBLE);
+        buttonView.setVisibility(View.VISIBLE);
+        progressView = findViewById(R.id.progressPage);
+        progressView.setVisibility(View.GONE);
+        progressBar = findViewById(R.id.progressBar);
 
 
         //글 페이지 초기화
@@ -240,6 +245,8 @@ public class MainActivity extends AppCompatActivity {
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        map.getUiSettings().setMyLocationButtonEnabled(false);
+        map.getUiSettings().setAllGesturesEnabled(false);
 
         //마커 클릭 이벤트 설정
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
@@ -257,8 +264,10 @@ public class MainActivity extends AppCompatActivity {
         articleMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.articleMap);
         articleMap = articleMapFragment.getMap();
         articleMap.getUiSettings().setMyLocationButtonEnabled(false);
-        articleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
 
+
+
+        articleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
 
@@ -436,7 +445,7 @@ public class MainActivity extends AppCompatActivity {
                 if(recordOn) {
                     dbInsertPolyline(latlng);
                 }
-                if(dateFrame(CalendarView.selectedDateInfo).equals(dateFrame(today))) {
+                if(dateFrame(CalendarView.selectedDateInfo).equals(dateFrame(today)) && recordOn) {
                     map.addPolyline(pOptions);
                 }
             }
@@ -687,11 +696,15 @@ public class MainActivity extends AppCompatActivity {
         if(!zoomOn) {
             calendarView.setVisibility(View.GONE);
             findViewById(R.id.shadowBar).setVisibility(View.GONE);
+            map.getUiSettings().setMyLocationButtonEnabled(true);
+            map.getUiSettings().setAllGesturesEnabled(true);
             zoomOn = true;
         }
         else {
             calendarView.setVisibility(View.VISIBLE);
             findViewById(R.id.shadowBar).setVisibility(View.VISIBLE);
+            map.getUiSettings().setMyLocationButtonEnabled(false);
+            map.getUiSettings().setAllGesturesEnabled(false);
             zoomOn = false;
         }
     }
@@ -711,7 +724,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         articleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        articleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(values.latitude, values.longitude), 16));
+        articleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(values.latitude, values.longitude), 15));
         mainMarkerPosition = new LatLng(values.latitude,values.longitude);
         options.inSampleSize = 4;
 

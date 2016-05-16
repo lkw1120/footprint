@@ -21,6 +21,11 @@ import java.io.InputStreamReader;
 public class HttpGetArticleTask extends AsyncTask<String, String, ArticleData> {
 
     @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+    }
+
+    @Override
     protected ArticleData doInBackground(String... values) {
         // TODO Auto-generated method stub
         Log.d("HGAT", "THREAD START");
@@ -32,7 +37,7 @@ public class HttpGetArticleTask extends AsyncTask<String, String, ArticleData> {
         HttpPost httpPost = new HttpPost("http://52.79.139.48/han/id_sel.php");
         try {
 
-            String[] receiveData = new String[7];
+            String[] receiveData = new String[8];
 
             Log.d("HGAT", "SETMODE PASS");
             builder.addTextBody("id", values[0], ContentType.create("Multipart/related", "utf8"));
@@ -96,6 +101,7 @@ public class HttpGetArticleTask extends AsyncTask<String, String, ArticleData> {
                 result.filename = receiveData[4];
                 result.latitude = Double.parseDouble(receiveData[5]);
                 result.longitude = Double.parseDouble(receiveData[6]);
+                //result.cnt = Integer.parseInt(receiveData[7]);
 
 
 
