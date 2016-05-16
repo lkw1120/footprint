@@ -17,7 +17,6 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
@@ -43,9 +42,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -130,7 +126,8 @@ public class MainActivity extends AppCompatActivity {
     private final static int POLYLINE_LONGITUDE = 3;
 
     private boolean recordOn = false;
-    private boolean zoomOn = true;
+    private boolean zoomOn = false;
+    private int zoomLevel = 17;
 
     private static DBOpenHelper helper;
 
@@ -401,7 +398,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         LatLng startPoint = new LatLng(latitude,longitude);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 16));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, zoomLevel));
         //Toast.makeText(getApplicationContext(), "위치 확인이 시작되었습니다. 로그를 확인하세요.", Toast.LENGTH_SHORT).show();
 
     }
@@ -442,11 +439,11 @@ public class MainActivity extends AppCompatActivity {
                 if(dateFrame(CalendarView.selectedDateInfo).equals(dateFrame(today))) {
                     map.addPolyline(pOptions);
                 }
-
             }
-
-            showCurrentLocation(latitude, longitude);
-
+            //맵이 전체화면이 아니고, 달력에서 선택한 날짜가 오늘일 경우 동작
+            if(dateFrame(CalendarView.selectedDateInfo).equals(dateFrame(today)) && !zoomOn) {
+                showCurrentLocation(latitude, longitude);
+            }
         }
         /**
          * 현 위치를 중심으로 화면에 지도를 띄워주는 메소드
@@ -687,15 +684,15 @@ public class MainActivity extends AppCompatActivity {
 
     }
     public void zoomOnOff() {
-        if(zoomOn) {
+        if(!zoomOn) {
             calendarView.setVisibility(View.GONE);
             findViewById(R.id.shadowBar).setVisibility(View.GONE);
-            zoomOn = false;
+            zoomOn = true;
         }
         else {
             calendarView.setVisibility(View.VISIBLE);
             findViewById(R.id.shadowBar).setVisibility(View.VISIBLE);
-            zoomOn = true;
+            zoomOn = false;
         }
     }
 
