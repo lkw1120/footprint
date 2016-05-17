@@ -46,6 +46,8 @@ while ($row = @mysql_fetch_assoc($result)){
 
 }
 
+mysql_query("UPDATE $database SET count = count + 1 WHERE id = $id_select");
+
 mysql_close($connect);
 
 

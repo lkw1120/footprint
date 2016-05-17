@@ -34,6 +34,8 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -126,6 +128,10 @@ public class MainActivity extends AppCompatActivity {
     private final static int POLYLINE_DATE = 1;
     private final static int POLYLINE_LATITUDE = 2;
     private final static int POLYLINE_LONGITUDE = 3;
+
+
+    private final static int MARKER_GREEN = 10;
+    private final static int MARKER_RAINBOW = 20;
 
     private boolean recordOn = false;
     private boolean zoomOn = false;
@@ -405,9 +411,10 @@ public class MainActivity extends AppCompatActivity {
         } catch (SecurityException ex) {
             ex.printStackTrace();
         }
-
-        LatLng startPoint = new LatLng(latitude,longitude);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, zoomLevel));
+        if(latitude!=null && longitude!=null) {
+            LatLng startPoint = new LatLng(latitude, longitude);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, zoomLevel));
+        }
         //Toast.makeText(getApplicationContext(), "위치 확인이 시작되었습니다. 로그를 확인하세요.", Toast.LENGTH_SHORT).show();
 
     }
@@ -857,7 +864,7 @@ public class MainActivity extends AppCompatActivity {
             result.moveToFirst();
             do {
                 markerIdHash.put(map.addMarker(new MarkerOptions().position(
-                                new LatLng(result.getDouble(DB_LATITUDE), result.getDouble(DB_LONGITUDE)))),
+                                new LatLng(result.getDouble(DB_LATITUDE), result.getDouble(DB_LONGITUDE))).icon(BitmapDescriptorFactory.fromResource(R.drawable.main_marker_icon))),
                         String.valueOf(result.getInt(DB_ID)));
             } while (result.moveToNext());
 
@@ -885,20 +892,31 @@ public class MainActivity extends AppCompatActivity {
         }catch(Exception e) {
             e.printStackTrace();
         }
+        BitmapDescriptor bitmapDescriptor;
 
         Log.d("HASH_LBRS", String.valueOf(lbrsList.size()));
         if(lbrsList.size() > 0) {
 
             for (int i = 0; i < lbrsList.size(); i++) {
+                if(lbrsList.get(i).cnt > MARKER_RAINBOW) {
+                    bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.location_icon_rainbow_24dp);
+                }
+                else if(lbrsList.get(i).cnt > MARKER_GREEN) {
+                    bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.location_icon_green_24dp);
+                }
+                else {
+                    bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.location_icon_red_24dp);
+                }
+
                 lbrsHash.put(articleMap.addMarker(
-                                new MarkerOptions().position(new LatLng(lbrsList.get(i).latitude, lbrsList.get(i).longitude))),
+                                new MarkerOptions().position(new LatLng(lbrsList.get(i).latitude, lbrsList.get(i).longitude)).icon(bitmapDescriptor)),
                         String.valueOf(lbrsList.get(i).id));
 
                 Log.d("HASH_LBRS", lbrsList.get(i).latitude + " " + lbrsList.get(i).longitude + " " + lbrsList.get(i).id);
             }
         }
         else {
-            articleMap.addMarker(new MarkerOptions().position(new LatLng(values.latitude, values.longitude)));
+            articleMap.addMarker(new MarkerOptions().position(new LatLng(values.latitude, values.longitude)).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_icon_red_24dp)));
         }
 
         return ;

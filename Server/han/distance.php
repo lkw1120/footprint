@@ -46,7 +46,8 @@ while ($row = @mysql_fetch_assoc($result)){
 	//echo '<p>';
   echo ''. parseToXML($row['id']) .',';
   echo ''. $row['latitude'] . ',';
-  echo '' . $row['longitude'] . ';';
+  echo '' . $row['longitude'] . ',';
+  echo '' . $row['count'] . ';';
   echo '';
 //echo '/>';
 

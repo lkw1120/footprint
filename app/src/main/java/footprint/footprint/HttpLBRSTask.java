@@ -24,8 +24,6 @@ public class HttpLBRSTask extends AsyncTask<String, String, LinkedList<LBRS>> {
     /**
      *
      * 추천 마커 받아오기 완성됨
-     * @param values
-     * @return
      */
 
     @Override
@@ -74,11 +72,11 @@ public class HttpLBRSTask extends AsyncTask<String, String, LinkedList<LBRS>> {
             BufferedReader bufferedReader = new BufferedReader(
                     new InputStreamReader(inputStream, "utf8"));
 
-            int i = 0, j = 0, k = 0;
+            int i = 0, j = 0, k = 0, l = 0;
             int id;
             double lati;
             double longi;
-            //int cnt;
+            int cnt;
 
             String line;
 
@@ -89,16 +87,16 @@ public class HttpLBRSTask extends AsyncTask<String, String, LinkedList<LBRS>> {
 
                     id = Integer.parseInt(line.substring(0, (i = line.indexOf(","))));
                     lati = Double.parseDouble(line.substring(i + 1, (j = line.indexOf(",", i + 1))));
-                    longi = Double.parseDouble(line.substring(j + 1, (k = line.indexOf(";", j + 1))));
-                    //cnt = Integer.parseInt(line.substring()) ???
+                    longi = Double.parseDouble(line.substring(j + 1, (k = line.indexOf(",", j + 1))));
+                    cnt = Integer.parseInt(line.substring(k + 1, (l = line.indexOf(";", k + 1))));
 
 
                     Log.d("BUFFERLINE", id + " " + lati + " " + longi);
 
-                    receiveData.add(new LBRS(id, lati, longi));
+                    receiveData.add(new LBRS(id, lati, longi, cnt));
                     String subString = line;
 
-                    line = subString.substring(k + 1);
+                    line = subString.substring(l + 1);
                     if(line.indexOf("END",0) == 0) {
                         break;
                     }
