@@ -49,27 +49,29 @@ public class CalendarView extends LinearLayout
 
 
 	// select past date
-	private Date pastday = null;
+	private Date pastDate = new Date();
 
 	public static Date selectedDateInfo = new Date();
 
 	//event handling
 	private EventHandler eventHandler = new EventHandler() {
+		/*
 		@Override
 		public void onDayLongPress(Date date) {
 			Log.d("EVENT", "LONG_PRESS_SUCCESS");
 
-
-			pastday = date;
+			pastDate = date;
 			updateCalendar();
 		}
+		*/
 
 		@Override
 		public void onDayPress(Date date) {
 			Log.d("EVENT","SHORT_PRESS_SUCCESS");
 			Log.d("EVENT", "LONG_PRESS " + date.getYear() + " " + date.getMonth() + " " + date.getDate());
 
-			pastday = date;
+			pastDate = date;
+			selectedDateInfo = date;
 			updateCalendar();
 			MainActivity.displayMapSubInfo(date);
 
@@ -164,7 +166,7 @@ public class CalendarView extends LinearLayout
 
 				currentDate = Calendar.getInstance();
 				currentDate.set(today.getYear() + 1900,today.getMonth(),today.getDate());
-				pastday=null;
+				pastDate=null;
 
 				updateCalendar();
 				MainActivity.displayMapSubInfo(today);
@@ -190,6 +192,7 @@ public class CalendarView extends LinearLayout
 		});
 
 		// long-pressing a day
+		/*
 		grid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
 			@Override
@@ -201,9 +204,11 @@ public class CalendarView extends LinearLayout
 				}
 
 				eventHandler.onDayLongPress((Date) view.getItemAtPosition(position));
+
 				return true;
 			}
 		});
+		*/
 
 		// short-pressing a day
 		grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -217,6 +222,7 @@ public class CalendarView extends LinearLayout
 				}
 
 				eventHandler.onDayPress((Date) view.getItemAtPosition(position));
+
 				return;
 			}
 		});
@@ -269,7 +275,7 @@ public class CalendarView extends LinearLayout
 	}
 
 
-	private class CalendarAdapter extends ArrayAdapter<Date>
+	protected class CalendarAdapter extends ArrayAdapter<Date>
 	{
 		// days with events
 		private HashSet<Date> eventDays;
@@ -329,15 +335,13 @@ public class CalendarView extends LinearLayout
 			((TextView)view).setTextColor(getResources().getColor(R.color.greyed_out));
 
 			}
-			else if (pastday!=null) {
-				if(day == pastday.getDate() && month == pastday.getMonth() && year == pastday.getYear()) {
+			else if (pastDate!=null) {
+				if(day == pastDate.getDate() && month == pastDate.getMonth() && year == pastDate.getYear()) {
 
 					((TextView) view).setTypeface(null, Typeface.BOLD);
 					((TextView) view).setTextColor(getResources().getColor(R.color.pastday));
 
-					selectedDateInfo = pastday;
-					//pastday=null;
-					Log.d("SELECTDATEINFO", pastday.toGMTString());
+					Log.d("SELECTDATEINFO", pastDate.toGMTString());
 				}
 			}
 			else if (day == today.getDate() && month == today.getMonth() && year == today.getYear()) {
@@ -346,8 +350,6 @@ public class CalendarView extends LinearLayout
 
 				 ((TextView) view).setTypeface(null, Typeface.BOLD);
 				 ((TextView) view).setTextColor(getResources().getColor(R.color.today));
-
-				selectedDateInfo = today;
 
 				Log.d("SELECTDATEINFO", today.toGMTString());
 			}
@@ -374,7 +376,7 @@ public class CalendarView extends LinearLayout
 	 */
 	public interface EventHandler
 	{
-		void onDayLongPress(Date date);
+		//void onDayLongPress(Date date);
 		void onDayPress(Date date);
 	}
 

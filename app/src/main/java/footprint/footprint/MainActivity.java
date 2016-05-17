@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean recordOn = false;
     private boolean zoomOn = false;
-    private int zoomLevel = 17;
+    private static int zoomLevel = 16;
 
     private static DBOpenHelper helper;
 
@@ -854,13 +854,19 @@ public class MainActivity extends AppCompatActivity {
         Cursor result = db.rawQuery(sql, null);
         if(result.getCount() > 0) {
 
-            if (result.moveToFirst()) {
-                do {
-                    markerIdHash.put(map.addMarker(new MarkerOptions().position(
-                                    new LatLng(result.getDouble(DB_LATITUDE), result.getDouble(DB_LONGITUDE)))),
-                            String.valueOf(result.getInt(DB_ID)));
-                } while (result.moveToNext());
+            result.moveToFirst();
+            do {
+                markerIdHash.put(map.addMarker(new MarkerOptions().position(
+                                new LatLng(result.getDouble(DB_LATITUDE), result.getDouble(DB_LONGITUDE)))),
+                        String.valueOf(result.getInt(DB_ID)));
+            } while (result.moveToNext());
+
+            if(!dateFrame(CalendarView.selectedDateInfo).equals(dateFrame(today))) {
+                Log.d("DATE", dateFrame(CalendarView.selectedDateInfo) + "=" + dateFrame(today));
+                result.moveToFirst();
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(result.getDouble(DB_LATITUDE), result.getDouble(DB_LONGITUDE)), zoomLevel));
             }
+
         }
         result.close();
         db.close();
