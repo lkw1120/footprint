@@ -68,8 +68,6 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView articleDateTime = null;
     private TextView articleText = null;
-    private TextView articleLatitude = null;
-    private TextView articleLongitude = null;
     private ImageView articleImageView = null;
 
     private FloatingActionsMenu writeFab = null;
@@ -177,8 +175,6 @@ public class MainActivity extends AppCompatActivity {
         articleDateTime = (TextView) findViewById(R.id.articleDateTime);
         articleText = (TextView) findViewById(R.id.articleText);
         articleImageView = (ImageView) findViewById(R.id.articleImageView);
-        articleLatitude = (TextView) findViewById(R.id.articleLatitude);
-        articleLongitude = (TextView) findViewById(R.id.articleLongitude);
 
 
         //버튼 초기화
@@ -724,8 +720,6 @@ public class MainActivity extends AppCompatActivity {
         articleDateTime.setText(values.date + " " + values.time);
         articleText.setText(values.article);
 
-        articleLatitude.setText(String.valueOf(values.latitude));
-        articleLongitude.setText(String.valueOf(values.longitude));
         BitmapFactory.Options options = new BitmapFactory.Options();
         //Toast.makeText(this, "2", Toast.LENGTH_SHORT).show();
 

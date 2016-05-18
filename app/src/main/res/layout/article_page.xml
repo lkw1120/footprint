@@ -33,31 +33,45 @@
                     android:layout_height="240dp"/>
                 -->
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#EEEEEE" />
                 <TextView
                     android:id="@+id/articleDateTime"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="36dp"
+                    android:textSize="18sp"
+                    android:textAlignment="center"
+                    android:textColor="#777777"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="5dp"
                     android:background="@color/white" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="#EEEEEE" />
                 <ImageView
                     android:id="@+id/articleImageView"
                     android:layout_width="match_parent"
-                    android:layout_height="240dp"
-                    android:background="@color/white" />
+                    android:layout_height="210dp"
+                    android:background="#EEEEEE" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#EEEEEE" />
                 <TextView
                     android:id="@+id/articleText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textColor="#777777"
+                    android:paddingTop="10dp"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
                     android:background="@color/white" />
-                <TextView
-                    android:id="@+id/articleLatitude"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/white" />
-                <TextView
-                    android:id="@+id/articleLongitude"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/white" />
+
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
