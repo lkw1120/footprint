@@ -35,13 +35,13 @@ if (!$result) {
 }
 
 while ($row = @mysql_fetch_assoc($result)){
-  echo '' . parseToXML($row['id']) . ',';
-  echo '' . $row['writeDate'] . ',';
-  echo '' . $row['writeTime'] . ',';
-  echo '' . $row['article']. ',';
-  echo '' . $row['filename'] .',';
-  echo '' . $row['latitude'] . ',';
-  echo '' . $row['longitude'] . ',';
+  echo '' . parseToXML($row['id']) . ';';
+  echo '' . $row['writeDate'] . ';';
+  echo '' . $row['writeTime'] . ';';
+  echo '' . $row['article']. ';';
+  echo '' . $row['filename'] .';';
+  echo '' . $row['latitude'] . ';';
+  echo '' . $row['longitude'] . ';';
   echo 'END';
 
 }

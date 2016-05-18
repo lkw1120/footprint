@@ -85,9 +85,9 @@ public class HttpLBRSTask extends AsyncTask<String, String, LinkedList<LBRS>> {
 
                 while(true) {
 
-                    id = Integer.parseInt(line.substring(0, (i = line.indexOf(","))));
-                    lati = Double.parseDouble(line.substring(i + 1, (j = line.indexOf(",", i + 1))));
-                    longi = Double.parseDouble(line.substring(j + 1, (k = line.indexOf(",", j + 1))));
+                    id = Integer.parseInt(line.substring(0, (i = line.indexOf(";"))));
+                    lati = Double.parseDouble(line.substring(i + 1, (j = line.indexOf(";", i + 1))));
+                    longi = Double.parseDouble(line.substring(j + 1, (k = line.indexOf(";", j + 1))));
                     cnt = Integer.parseInt(line.substring(k + 1, (l = line.indexOf(";", k + 1))));
 
 

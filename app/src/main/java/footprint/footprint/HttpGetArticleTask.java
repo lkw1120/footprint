@@ -80,7 +80,7 @@ public class HttpGetArticleTask extends AsyncTask<String, String, ArticleData> {
                 while(true) {
 
 
-                    receiveData[j] = line.substring(0, ((i = line.indexOf(","))) );
+                    receiveData[j] = line.substring(0, ((i = line.indexOf(";"))) );
                     String subString = line;
                     line = subString.substring(i + 1);
 
