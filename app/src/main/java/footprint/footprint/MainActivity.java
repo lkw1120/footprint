@@ -66,7 +66,8 @@ public class MainActivity extends AppCompatActivity {
     protected static View progressView = null;
     protected static View progressBar = null;
 
-    private TextView articleDateTime = null;
+    private TextView articleDate = null;
+    private TextView articleTime = null;
     private TextView articleText = null;
     private ImageView articleImageView = null;
 
@@ -172,7 +173,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         //글 페이지 초기화
-        articleDateTime = (TextView) findViewById(R.id.articleDateTime);
+        articleDate = (TextView) findViewById(R.id.articleDate);
+        articleTime = (TextView) findViewById(R.id.articleTime);
         articleText = (TextView) findViewById(R.id.articleText);
         articleImageView = (ImageView) findViewById(R.id.articleImageView);
 
@@ -717,7 +719,8 @@ public class MainActivity extends AppCompatActivity {
 
         dbSelectMarker(values);
         //실제 필요한 작업 처리
-        articleDateTime.setText(values.date + " " + values.time);
+        articleDate.setText(values.date);
+        articleTime.setText(values.time);
         articleText.setText(values.article);
 
         BitmapFactory.Options options = new BitmapFactory.Options();
