@@ -8,4 +8,7 @@
     <string name="save_button">SAVE</string>
     <string name="image_upload">Image Upload area</string>
     <string name="new_article">NEW</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
 </resources>

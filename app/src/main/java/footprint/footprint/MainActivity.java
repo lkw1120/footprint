@@ -19,8 +19,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -28,6 +33,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.support.design.widget.NavigationView;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
@@ -52,7 +58,8 @@ import java.util.LinkedList;
 import static android.media.ExifInterface.TAG_DATETIME;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
 
 
     //변수는 여기에서(?)
@@ -148,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         startActivity(new Intent(this, PreLoadActivity.class));
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -294,14 +304,56 @@ public class MainActivity extends AppCompatActivity {
         imageView = (ImageView) findViewById(R.id.imageView);
         inputText = (EditText) findViewById(R.id.inputText);
 
+
+        //슬라이드 바
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+
+
+        displayMapSubInfo(CalendarView.selectedDateInfo);
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_camera) {
+            // Handle the camera action
+        } else if (id == R.id.nav_gallery) {
+
+        } else if (id == R.id.nav_slideshow) {
+
+        } else if (id == R.id.nav_manage) {
+
+        } else if (id == R.id.nav_share) {
+
+        } else if (id == R.id.nav_send) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
 
 
 
     @Override
     public void onBackPressed() {
-        if(writeView.getVisibility() == View.VISIBLE)  {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else if(writeView.getVisibility() == View.VISIBLE)  {
             mainView.setVisibility(View.VISIBLE);
             writeView.setVisibility(View.GONE);
             buttonView.setVisibility(View.VISIBLE);
@@ -753,6 +805,8 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+        displayMapSubInfo(CalendarView.selectedDateInfo);
+
     }
 
 
@@ -848,6 +902,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * 메인 페이지에서의 마커 표시
+     * @param date
+     */
     public static void dbSelectMarkerByDate (Date date) {
 
 
@@ -877,6 +935,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Article 페이지에서 주변 마커 표시
+     * @param values
+     */
     public void dbSelectMarker (ArticleData values) {
 
         lbrsHash.clear();
@@ -891,7 +953,7 @@ public class MainActivity extends AppCompatActivity {
         }
         BitmapDescriptor bitmapDescriptor;
 
-        Log.d("HASH_LBRS", String.valueOf(lbrsList.size()));
+        //Log.d("HASH_LBRS", String.valueOf(lbrsList.size()));
         if(lbrsList.size() > 0) {
 
             for (int i = 0; i < lbrsList.size(); i++) {

@@ -74,7 +74,7 @@ public class HttpGetArticleTask extends AsyncTask<String, String, ArticleData> {
             int j=0;
 
 
-            while((line = bufferedReader.readLine()) != null) {
+            if(!(line = bufferedReader.readLine()).equals("END")) {
 
                 Log.d("HGAT", line);
                 while(true) {

@@ -81,7 +81,7 @@ public class HttpLBRSTask extends AsyncTask<String, String, LinkedList<LBRS>> {
             String line;
 
 
-            while((line = bufferedReader.readLine()) != null) {
+            if(!(line = bufferedReader.readLine()).equals("END")) {
 
                 while(true) {
 
