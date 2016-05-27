@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity
     private FloatingActionButton recordOffFab = null;
     private FloatingActionButton zoomFab = null;
     private FloatingActionButton goMainFab = null;
-
+    private FloatingActionButton saveFab = null;
     private Button saveButton = null;
 
 
@@ -208,6 +208,15 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        //저장 팹 버튼 생성
+        saveFab = (FloatingActionButton) findViewById(R.id.saveFab);
+        saveFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSavePressed();
+            }
+        });
+
         //기록 팹 버튼 생성
         recordOnFab = (FloatingActionButton) findViewById(R.id.recordOnState);
         recordOffFab = (FloatingActionButton) findViewById(R.id.recordOffState);
@@ -246,14 +255,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        //글쓰기 버튼 설정
-        saveButton = (Button) findViewById(R.id.saveButton);
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onSavePressed();
-            }
-        });
 
         //맵 초기화
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -327,17 +328,13 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.nav_login) {
 
-        } else if (id == R.id.nav_slideshow) {
 
-        } else if (id == R.id.nav_manage) {
 
-        } else if (id == R.id.nav_share) {
+        } else if (id == R.id.nav_setting) {
+            
 
-        } else if (id == R.id.nav_send) {
 
         }
 
