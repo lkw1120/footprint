@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -33,7 +34,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.support.design.widget.NavigationView;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
@@ -160,6 +160,9 @@ public class MainActivity extends AppCompatActivity
 
         startActivity(new Intent(this, PreLoadActivity.class));
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+
+
 
         //DB 설정
         helper = new DBOpenHelper(this, "footprint.db", null, 1);
@@ -333,7 +336,7 @@ public class MainActivity extends AppCompatActivity
 
 
         } else if (id == R.id.nav_setting) {
-            
+
 
 
         }
@@ -513,7 +516,7 @@ public class MainActivity extends AppCompatActivity
          */
         private void showCurrentLocation(Double latitude, Double longitude) {
             LatLng curPoint = new LatLng(latitude, longitude);
-            map.animateCamera(CameraUpdateFactory.newLatLng(curPoint));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(curPoint,zoomLevel));
         }
 
         public void onProviderDisabled(String provider) {
