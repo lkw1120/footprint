@@ -29,7 +29,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -50,8 +49,12 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -82,9 +85,10 @@ public class MainActivity extends AppCompatActivity
     private FloatingActionButton recordOnFab = null;
     private FloatingActionButton recordOffFab = null;
     private FloatingActionButton zoomFab = null;
-    private FloatingActionButton goMainFab = null;
+    private FloatingActionButton goMainFabInWritePage = null;
+    private FloatingActionButton goMainFabInArticlePage = null;
     private FloatingActionButton saveFab = null;
-    private Button saveButton = null;
+    private FloatingActionButton rcmdFab = null;
 
 
     private static GoogleMap map = null;
@@ -108,6 +112,7 @@ public class MainActivity extends AppCompatActivity
     protected static HashMap<Object,String> lbrsHash = new HashMap<>();
 
     protected static ArticleData articleData = null;
+
 
     private ImageView imageView = null;
     private File imageFile = null;
@@ -203,8 +208,16 @@ public class MainActivity extends AppCompatActivity
         });
 
         //메인페이지 가는 팹 버튼 생성
-        goMainFab = (FloatingActionButton) findViewById(R.id.goMainFab);
-        goMainFab.setOnClickListener(new View.OnClickListener() {
+        goMainFabInWritePage = (FloatingActionButton) findViewById(R.id.goMainFabInWritePage);
+        goMainFabInWritePage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
+        goMainFabInArticlePage = (FloatingActionButton) findViewById(R.id.goMainFabInArticlePage);
+        goMainFabInArticlePage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
@@ -217,6 +230,15 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 onSavePressed();
+            }
+        });
+
+        //추천 팹 버튼 생성
+        rcmdFab = (FloatingActionButton) findViewById(R.id.rcmdFab);
+        rcmdFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onRcmdPressed();
             }
         });
 
@@ -353,15 +375,14 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if(articleView.getVisibility()==View.VISIBLE) {
+            mainView.setVisibility(View.VISIBLE);
+            articleView.setVisibility(View.GONE);
+            buttonView.setVisibility(View.VISIBLE);
+            writeViewReset();
         } else if(writeView.getVisibility() == View.VISIBLE)  {
             mainView.setVisibility(View.VISIBLE);
             writeView.setVisibility(View.GONE);
-            buttonView.setVisibility(View.VISIBLE);
-            writeViewReset();
-        }
-        else if(articleView.getVisibility()==View.VISIBLE) {
-            mainView.setVisibility(View.VISIBLE);
-            articleView.setVisibility(View.GONE);
             buttonView.setVisibility(View.VISIBLE);
             writeViewReset();
         }
@@ -693,6 +714,48 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
+
+    public void onRcmdPressed() {
+
+        final String IP_NONE = "N/A";
+        final String WIFI_DEVICE_PREFIX = "eth";
+
+        String LocalIP = IP_NONE;
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                NetworkInterface intf = en.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress()) {
+                        if( LocalIP.equals(IP_NONE) )
+                            LocalIP = inetAddress.getHostAddress().toString();
+                        else if( intf.getName().startsWith(WIFI_DEVICE_PREFIX) )
+                            LocalIP = inetAddress.getHostAddress().toString();
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            Log.e("IP_CHECK", "getLocalIpAddress Exception:" + e.toString());
+        }
+        Log.d("IP_CHECK",LocalIP);
+        try {
+            String checker = new HttpRcmdTask().execute(LocalIP,articleData.date,articleData.time,articleData.article).get();
+
+            if(checker.equals("EXIST")) {
+                Toast.makeText(this,"이미 추천한 글입니다.", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Toast.makeText(this,"추천하였습니다.", Toast.LENGTH_SHORT).show();
+            }
+
+        }catch(InterruptedException e) {
+            e.printStackTrace();
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
     /**
      * 요일마다 색깔을 다르게 구분

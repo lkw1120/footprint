@@ -27,7 +27,7 @@ $id_select = (int)@$_POST["id"];
 // Select all the rows in the markers table
 $query = "SELECT footprint . *
 FROM footprint.footprint
-WHERE id = $id_select";
+WHERE id = $id_select;";
 
 $result = mysql_query($query);
 if (!$result) {
@@ -46,7 +46,7 @@ while ($row = @mysql_fetch_assoc($result)){
 
 }
 
-mysql_query("UPDATE $database SET count = count + 1 WHERE id = $id_select");
+#mysql_query("UPDATE $database SET count = count + 1 WHERE id = $id_select");
 
 mysql_close($connect);
 
