@@ -29,8 +29,12 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,6 +77,7 @@ public class MainActivity extends AppCompatActivity
     private View articleView = null;
     private View calendarView = null;
     private View buttonView = null;
+    private View settingView = null;
     protected static View progressView = null;
     protected static View progressBar = null;
 
@@ -148,6 +153,28 @@ public class MainActivity extends AppCompatActivity
     private boolean zoomOn = false;
     private static int zoomLevel = 16;
 
+
+    private final static int RADIAN_100M = 0;
+    private final static int RADIAN_500M = 1;
+    private final static int RADIAN_1KM = 2;
+    private final static int RADIAN_3KM = 3;
+    private final static int RADIAN_5KM = 4;
+
+
+    private final static int MIN_RCMD_0 = 0;
+    private final static int MIN_RCMD_10 = 1;
+    private final static int MIN_RCMD_20 = 2;
+    private final static int MIN_RCMD_30 = 3;
+    private final static int MIN_RCMD_40 = 4;
+
+
+    private final static int TIMESPECTRUM_OFF = 0;
+    private final static int TIMESPECTRUM_ON = 1;
+
+    private static float radian = RADIAN_100M;
+    private static int minRcmd = MIN_RCMD_0;
+    private static int timeSpectrum = TIMESPECTRUM_OFF;
+
     private static DBOpenHelper helper;
 
 
@@ -185,6 +212,8 @@ public class MainActivity extends AppCompatActivity
         calendarView.setVisibility(View.VISIBLE);
         buttonView = findViewById(R.id.buttonPage);
         buttonView.setVisibility(View.VISIBLE);
+        settingView = findViewById(R.id.settingPage);
+        settingView.setVisibility(View.GONE);
         progressView = findViewById(R.id.progressPage);
         progressView.setVisibility(View.GONE);
         progressBar = findViewById(R.id.progressBar);
@@ -343,7 +372,6 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
-
         displayMapSubInfo(CalendarView.selectedDateInfo);
     }
 
@@ -355,12 +383,12 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_login) {
 
-
+            Toast.makeText(this,"로그인 기능 미구현", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.nav_setting) {
 
-
-
+            Toast.makeText(this,"설정 버튼", Toast.LENGTH_SHORT).show();
+            setSettingView();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -368,14 +396,91 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    public void setSettingView() {
+        settingView.setVisibility(View.VISIBLE);
+        mainView.setVisibility(View.GONE);
+        Spinner radianSpinner = (Spinner)findViewById(R.id.radianSpinner);
+        radianSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int position, long id) {
+                switch(position) {
+                    case RADIAN_100M:
+                        radian = 0.1f;
+                        break;
+                    case RADIAN_500M:
+                        radian = 0.5f;
+                        break;
+                    case RADIAN_1KM:
+                        radian = 1.0f;
+                        break;
+                    case RADIAN_3KM:
+                        radian = 3.0f;
+                        break;
+                    case RADIAN_5KM:
+                        radian = 5.0f;
+                        break;
+                    default:
+                        radian = 0.1f;
+                }
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+        Spinner rcmdSpinner = (Spinner)findViewById(R.id.recommendSpinner);
+        rcmdSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int position, long id) {
+                switch(position) {
+                    case MIN_RCMD_0:
+                        minRcmd = 0;
+                        break;
+                    case MIN_RCMD_10:
+                        minRcmd = 10;
+                        break;
+                    case MIN_RCMD_20:
+                        minRcmd = 20;
+                        break;
+                    case MIN_RCMD_30:
+                        minRcmd = 30;
+                        break;
+                    case MIN_RCMD_40:
+                        minRcmd = 40;
+                        break;
+                    default:
+                        minRcmd = 0;
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+        Switch timeSwitch = (Switch) findViewById(R.id.timeSwitch);
+        timeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    timeSpectrum = TIMESPECTRUM_ON;
+                } else {
+                    timeSpectrum = TIMESPECTRUM_OFF;
+                }
+            }
+        });
+
+    }
 
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else if(articleView.getVisibility()==View.VISIBLE) {
+        } else if (settingView.getVisibility() == View.VISIBLE) {
+            mainView.setVisibility(View.VISIBLE);
+            settingView.setVisibility(View.GONE);
+
+        }else if(articleView.getVisibility()==View.VISIBLE) {
             mainView.setVisibility(View.VISIBLE);
             articleView.setVisibility(View.GONE);
             buttonView.setVisibility(View.VISIBLE);
@@ -1007,9 +1112,29 @@ public class MainActivity extends AppCompatActivity
         lbrsHash.clear();
         articleMap.clear();
 
+        String minTime;
+        String maxTime;
+
+        int time  = Integer.parseInt(values.time.substring(0,1));
+        if(time >= 18) {
+            minTime = "18:00:00";
+            maxTime = "23:59:59";
+        }
+        else if (time >= 12) {
+            minTime = "12:00:00";
+            maxTime = "17:59:59";
+        }
+        else if (time >= 6) {
+            minTime = "06:00:00";
+            maxTime = "11:59:59";
+        }
+        else {
+            minTime = "00:00:00";
+            maxTime = "05:59:59";
+        }
 
         try {
-            lbrsList = new HttpLBRSTask().execute(String.valueOf(values.latitude), String.valueOf(values.longitude)).get();
+            lbrsList = new HttpLBRSTask().execute(String.valueOf(values.latitude), String.valueOf(values.longitude), String.valueOf(radian), String.valueOf(minRcmd),String.valueOf(timeSpectrum),minTime,maxTime).get();
 
         }catch(Exception e) {
             e.printStackTrace();
@@ -1036,9 +1161,6 @@ public class MainActivity extends AppCompatActivity
 
                 Log.d("HASH_LBRS", lbrsList.get(i).latitude + " " + lbrsList.get(i).longitude + " " + lbrsList.get(i).id);
             }
-        }
-        else {
-            articleMap.addMarker(new MarkerOptions().position(new LatLng(values.latitude, values.longitude)).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_icon_red_24dp)));
         }
 
         return ;

@@ -47,6 +47,11 @@ public class HttpLBRSTask extends AsyncTask<String, String, LinkedList<LBRS>> {
             Log.d("LBRS", "SETMODE PASS");
             builder.addTextBody("latitude", values[0], ContentType.create("Multipart/related", "utf8"));
             builder.addTextBody("longitude", values[1], ContentType.create("Multipart/related", "utf8"));
+            builder.addTextBody("radian", values[2], ContentType.create("Multipart/related", "utf8"));
+            builder.addTextBody("minRcmd", values[3], ContentType.create("Multipart/related", "utf8"));
+            builder.addTextBody("timeSpectrum", values[4], ContentType.create("Multipart/related", "utf8"));
+            builder.addTextBody("minTime", values[5], ContentType.create("Multipart/related", "utf8"));
+            builder.addTextBody("maxTime", values[6], ContentType.create("Multipart/related", "utf8"));
 
 
             Log.d("LBRS", "ADDTEXT PASS");
@@ -84,7 +89,7 @@ public class HttpLBRSTask extends AsyncTask<String, String, LinkedList<LBRS>> {
             if(!(line = bufferedReader.readLine()).equals("END")) {
 
                 while(true) {
-
+                    Log.d("BUFFERLINE", line);
                     id = Integer.parseInt(line.substring(0, (i = line.indexOf(";"))));
                     lati = Double.parseDouble(line.substring(i + 1, (j = line.indexOf(";", i + 1))));
                     longi = Double.parseDouble(line.substring(j + 1, (k = line.indexOf(";", j + 1))));

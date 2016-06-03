@@ -29,6 +29,9 @@
 
             <!-- 슬라이드 메뉴 -->
 
+            <include
+                android:id="@+id/settingPage"
+                layout="@layout/setting_page"/>
 
         </RelativeLayout>
 

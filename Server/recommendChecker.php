@@ -16,21 +16,25 @@ mysql_set_charset("utf8");
   $time = @$_POST["time"];
   $article = @$_POST["article"];
 
-  $info = mysql_query("SELECT footprint FROM footprint
-              WHERE writeDate = '$date' AND writeTime = '$time';");
-  $info = mysql_fetch_row($info);
-  $filename= $info[4];
-  $checker = mysql_query("SELECT recommendChecker FROM recommendChecker
-              WHERE ipNum = $key AND fp_id = $filename;");
-if($checker==null) {
-    mysql_query("UPDATE footprint SET count = count + 1 WHERE id = $filename");
-
-    mysql_query("INSERT INTO recommendChecker (fp_id, ipNum)
-                VALUES ('$filename', '$key');");
+$id = mysql_query("SELECT footprint.id FROM footprint WHERE writeDate = '$date' AND writeTime = '$time';");
+$id = mysql_result($id,0);
+$checker = mysql_query("SELECT recommendChecker.ipNum FROM recommendChecker WHERE fp_id = '$id';");
+if(checker!=NULL) {
+  while($row = mysql_fetch_array($checker)){
+    $fp_id[] = $row["ipNum"];
+  }
+  if (in_array($key, $fp_id)) {
+      echo "EXIST";
+  }
+  else {
+    mysql_query("UPDATE footprint SET count = count + 1 WHERE writeDate = '$date' AND writeTime = '$time';");
+    mysql_query("INSERT INTO recommendChecker (fp_id, ipNum) VALUES ('$id','$key');");
     echo "SUCCESS";
-}else {
-    echo "EXIST";
+  }
 }
+
+
+
 mysql_close($connect);
 
 ?>

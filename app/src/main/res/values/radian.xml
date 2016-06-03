@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="radian">
+        <item>100M</item>
+        <item>500M</item>
+        <item>1KM</item>
+        <item>3KM</item>
+        <item>5KM</item>
+    </string-array>
+</resources>

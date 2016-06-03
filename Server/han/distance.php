@@ -25,10 +25,20 @@ if (!$db_selected) {
 
 $x = @$_POST["latitude"];
 $y = @$_POST["longitude"];
-
+$radian = @$_POST["radian"];
+$minRcmd = @$_POST["minRcmd"];
+$timeSpectrun = @$_POST["timeSpectrum"];
+$minTime = @$_POST["minTime"];
+$maxTime = @$_POST["maxTime"];
 // Select all the rows in the markers table
-$query = "SELECT *, (6371*acos(cos(radians($x))*cos(radians(latitude))*cos(radians(longitude)-radians($y))+sin(radians($x))*sin(radians(latitude)))) AS distance FROM footprint HAVING distance <= 3 ORDER BY distance LIMIT 0, 1000";
-
+if($timeSpectrum==0) {
+  $query = "SELECT *, (6371*acos(cos(radians($x))*cos(radians(latitude))*cos(radians(longitude)-radians($y))+sin(radians($x))*sin(radians(latitude)))) AS distance FROM footprint WHERE footprint.count >= $minRcmd HAVING distance <= $radian ORDER BY distance LIMIT 0, 1000";
+}
+else {
+  $query = "SELECT *, (6371*acos(cos(radians($x))*cos(radians(latitude))*cos(radians(longitude)-radians($y))+sin(radians($x))*sin(radians(latitude))))
+   AS distance FROM footprint WHERE footprint.count >= $minRcmd AND footprint.writeTime >= $minTime AND footprint.writeTime <= $maxTime
+    HAVING distance <= $radian ORDER BY distance LIMIT 0, 1000";
+}
 $result = mysql_query($query);
 if (!$result) {
   die('Invalid query: ' . mysql_error());
