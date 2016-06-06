@@ -457,8 +457,7 @@ public class MainActivity extends AppCompatActivity
         rcmdSpinner.setSelection(minRcmdSelector);
 
         settingView.setVisibility(View.VISIBLE);
-        mainView.setVisibility(View.GONE);
-        buttonView.setVisibility(View.GONE);
+        settingView.setClickable(true);
 
         radianSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -571,8 +570,6 @@ public class MainActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         } else if (settingView.getVisibility() == View.VISIBLE) {
             savePreferences();
-            mainView.setVisibility(View.VISIBLE);
-            buttonView.setVisibility(View.VISIBLE);
             settingView.setVisibility(View.GONE);
 
         }else if(articleView.getVisibility()==View.VISIBLE) {
