@@ -10,5 +10,7 @@
     <string name="new_article">NEW</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="exit_title">FootPrint</string>
+    <string name="exit_message">FootPrint를 종료하시겠습니까?</string>
 
 </resources>

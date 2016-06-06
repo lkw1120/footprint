@@ -1,10 +1,13 @@
 package footprint.footprint;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -30,6 +33,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -171,9 +175,16 @@ public class MainActivity extends AppCompatActivity
     private final static int TIMESPECTRUM_OFF = 0;
     private final static int TIMESPECTRUM_ON = 1;
 
-    private static float radian = RADIAN_100M;
-    private static int minRcmd = MIN_RCMD_0;
+    private static float radian = 0.0f;
+    private static int radianSelector = RADIAN_100M;
+    private static int minRcmd = 0;
+    private static int minRcmdSelector = MIN_RCMD_0;
     private static int timeSpectrum = TIMESPECTRUM_OFF;
+    private static Button resetButton = null;
+
+    private static Spinner rcmdSpinner = null;
+    private static Spinner radianSpinner = null;
+
 
     private static DBOpenHelper helper;
 
@@ -372,8 +383,50 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
+
+        //설정화면 설정
+        rcmdSpinner = (Spinner)findViewById(R.id.recommendSpinner);
+        radianSpinner = (Spinner)findViewById(R.id.radianSpinner);
+        resetButton = (Button) findViewById(R.id.optionReset);
+        getPreferences();
+
         displayMapSubInfo(CalendarView.selectedDateInfo);
     }
+
+
+    /**
+     * 쉐어드프리퍼런스를 이용해서 옵션 저장
+     */
+    // 값 불러오기
+    private void getPreferences(){
+        SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+        timeSpectrum = Integer.parseInt(pref.getString("timeSwitch", "0"));
+        radianSelector = Integer.parseInt(pref.getString("radianSelector", "0"));
+        minRcmdSelector = Integer.parseInt(pref.getString("rcmdSelector", "0"));
+
+
+
+    }
+
+    // 값 저장하기
+    private void savePreferences(){
+        SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("timeSwitch", String.valueOf(timeSpectrum));
+        editor.putString("radianSelector", String.valueOf(radianSelector));
+        editor.putString("rcmdSelector", String.valueOf(minRcmdSelector));
+        editor.apply();
+    }
+
+
+    // 값(ALL Data) 삭제하기
+    private void removeAllPreferences(){
+        SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.apply();
+    }
+
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -386,8 +439,8 @@ public class MainActivity extends AppCompatActivity
             Toast.makeText(this,"로그인 기능 미구현", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.nav_setting) {
+            //Toast.makeText(this,"설정 버튼", Toast.LENGTH_SHORT).show();
 
-            Toast.makeText(this,"설정 버튼", Toast.LENGTH_SHORT).show();
             setSettingView();
         }
 
@@ -397,67 +450,96 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void setSettingView() {
+
+        radianSpinner.setSelection(radianSelector);
+        rcmdSpinner.setSelection(minRcmdSelector);
+
         settingView.setVisibility(View.VISIBLE);
         mainView.setVisibility(View.GONE);
-        Spinner radianSpinner = (Spinner)findViewById(R.id.radianSpinner);
+        buttonView.setVisibility(View.GONE);
+
         radianSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int position, long id) {
-                switch(position) {
+                switch (position) {
                     case RADIAN_100M:
                         radian = 0.1f;
+                        radianSelector = RADIAN_100M;
                         break;
                     case RADIAN_500M:
                         radian = 0.5f;
+                        radianSelector = RADIAN_500M;
                         break;
                     case RADIAN_1KM:
                         radian = 1.0f;
+                        radianSelector = RADIAN_1KM;
                         break;
                     case RADIAN_3KM:
                         radian = 3.0f;
+                        radianSelector = RADIAN_3KM;
                         break;
                     case RADIAN_5KM:
                         radian = 5.0f;
+                        radianSelector = RADIAN_5KM;
                         break;
                     default:
                         radian = 0.1f;
+                        radianSelector = RADIAN_100M;
                 }
+                savePreferences();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-        Spinner rcmdSpinner = (Spinner)findViewById(R.id.recommendSpinner);
+
         rcmdSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int position, long id) {
-                switch(position) {
+                switch (position) {
                     case MIN_RCMD_0:
                         minRcmd = 0;
+                        minRcmdSelector = MIN_RCMD_0;
                         break;
                     case MIN_RCMD_10:
                         minRcmd = 10;
+                        minRcmdSelector = MIN_RCMD_10;
                         break;
                     case MIN_RCMD_20:
                         minRcmd = 20;
+                        minRcmdSelector = MIN_RCMD_20;
                         break;
                     case MIN_RCMD_30:
                         minRcmd = 30;
+                        minRcmdSelector = MIN_RCMD_30;
                         break;
                     case MIN_RCMD_40:
                         minRcmd = 40;
+                        minRcmdSelector = MIN_RCMD_40;
                         break;
                     default:
                         minRcmd = 0;
+                        minRcmdSelector = MIN_RCMD_0;
                 }
+                savePreferences();
             }
+
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
         });
+
         Switch timeSwitch = (Switch) findViewById(R.id.timeSwitch);
+
+        if(timeSpectrum==1)
+            timeSwitch.setChecked(true);
+        else
+            timeSwitch.setChecked(false);
+
         timeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -466,6 +548,15 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     timeSpectrum = TIMESPECTRUM_OFF;
                 }
+                savePreferences();
+            }
+        });
+        resetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeAllPreferences();
+                getPreferences();
+                setSettingView();
             }
         });
 
@@ -477,7 +568,9 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (settingView.getVisibility() == View.VISIBLE) {
+            savePreferences();
             mainView.setVisibility(View.VISIBLE);
+            buttonView.setVisibility(View.VISIBLE);
             settingView.setVisibility(View.GONE);
 
         }else if(articleView.getVisibility()==View.VISIBLE) {
@@ -495,13 +588,28 @@ public class MainActivity extends AppCompatActivity
             calendarView.setVisibility(View.VISIBLE);
         }
         else {
-            //db_delete();
-            //super.onBackPressed();
-            //임시용
+            exitApplication();
         }
 
     }
-
+    public void exitApplication() {
+        new AlertDialog.Builder(this)
+                .setIcon(R.drawable.ic_app)
+                .setTitle(this.getString(R.string.exit_title)) // 제목부분 텍스트
+                .setMessage(this.getString(R.string.exit_message)) // 내용부분 텍스트
+                .setPositiveButton(this.getString(android.R.string.yes), //승인버튼을 눌렀을때..
+                        new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick( DialogInterface dialog, int which )
+                            {
+                                moveTaskToBack(true);
+                                finish(); //종료
+                            }
+                        }
+                ).setNegativeButton(this.getString(android.R.string.no), null ).show(); //취소버튼을 눌렀을때..
+        return ;
+    }
 
     public void writeViewReset(){
 
@@ -1237,9 +1345,6 @@ public class MainActivity extends AppCompatActivity
         int day = date.getDate();
         return String.format("%04d-%02d-%02d", year + 1900, month+1,day);
     }
-
-
-
 
 
 
