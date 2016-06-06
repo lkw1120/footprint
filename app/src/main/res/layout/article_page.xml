@@ -69,8 +69,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:background="#EEEEEE" />
-                <ImageView
-                    android:id="@+id/articleImageView"
+                <ImageButton
+                    android:id="@+id/articleImageButton"
                     android:layout_width="match_parent"
                     android:layout_height="205dp"
                     android:background="#EEEEEE" />

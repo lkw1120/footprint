@@ -36,6 +36,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -88,7 +89,7 @@ public class MainActivity extends AppCompatActivity
     private TextView articleDate = null;
     private TextView articleTime = null;
     private TextView articleText = null;
-    private ImageView articleImageView = null;
+    private ImageView articleImageButton = null;
 
     private FloatingActionsMenu writeFab = null;
     private FloatingActionButton recordOnFab = null;
@@ -234,7 +235,8 @@ public class MainActivity extends AppCompatActivity
         articleDate = (TextView) findViewById(R.id.articleDate);
         articleTime = (TextView) findViewById(R.id.articleTime);
         articleText = (TextView) findViewById(R.id.articleText);
-        articleImageView = (ImageView) findViewById(R.id.articleImageView);
+        articleImageButton = (ImageButton) findViewById(R.id.articleImageButton);
+
 
 
         //버튼 초기화
@@ -345,8 +347,6 @@ public class MainActivity extends AppCompatActivity
         articleMap = articleMapFragment.getMap();
         articleMap.getUiSettings().setMyLocationButtonEnabled(false);
 
-
-
         articleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
@@ -365,6 +365,8 @@ public class MainActivity extends AppCompatActivity
             }
 
         });
+
+
 
 
         imageView = (ImageView) findViewById(R.id.imageView);
@@ -1055,9 +1057,19 @@ public class MainActivity extends AppCompatActivity
         //Toast.makeText(this, "2", Toast.LENGTH_SHORT).show();
 
 
+        final Double lati = values.latitude;
+        final Double longi = values.longitude;
+
+        articleImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                articleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lati, longi)));
+            }
+        });
         articleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         articleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(values.latitude, values.longitude), 15));
         mainMarkerPosition = new LatLng(values.latitude,values.longitude);
+
         options.inSampleSize = 4;
 
         if(values.filename != null) {
@@ -1077,7 +1089,7 @@ public class MainActivity extends AppCompatActivity
                     e.printStackTrace();
                 }
             }
-            articleImageView.setImageBitmap(bitmap);
+            articleImageButton.setImageBitmap(bitmap);
 
         }
 
