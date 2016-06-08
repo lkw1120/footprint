@@ -195,6 +195,7 @@ public class MainActivity extends AppCompatActivity
 
     private NotificationManager notiManager = null;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -386,11 +387,12 @@ public class MainActivity extends AppCompatActivity
 
 
 
-        //설정화면 설정
+        //설정 초기화
         rcmdSpinner = (Spinner)findViewById(R.id.recommendSpinner);
         radianSpinner = (Spinner)findViewById(R.id.radianSpinner);
         resetButton = (Button) findViewById(R.id.optionReset);
         getPreferences();
+
 
         displayMapSubInfo(CalendarView.selectedDateInfo);
     }

@@ -210,6 +210,7 @@ public class CalendarView extends LinearLayout
 		});
 		*/
 
+
 		// short-pressing a day
 		grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
