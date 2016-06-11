@@ -203,6 +203,9 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            // 마시멜로우 이상 버전에서는 개별 권한 허가가 필요
+        }
         startActivity(new Intent(this, PreLoadActivity.class));
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -393,7 +396,6 @@ public class MainActivity extends AppCompatActivity
         resetButton = (Button) findViewById(R.id.optionReset);
         getPreferences();
 
-
         displayMapSubInfo(CalendarView.selectedDateInfo);
     }
 
@@ -407,8 +409,8 @@ public class MainActivity extends AppCompatActivity
         timeSpectrum = Integer.parseInt(pref.getString("timeSwitch", "0"));
         radianSelector = Integer.parseInt(pref.getString("radianSelector", "0"));
         minRcmdSelector = Integer.parseInt(pref.getString("rcmdSelector", "0"));
-
-
+        radian = Float.parseFloat(pref.getString("radian","0.0f"));
+        minRcmd = Integer.parseInt(pref.getString("minRcmd","0"));
 
     }
 
@@ -419,6 +421,8 @@ public class MainActivity extends AppCompatActivity
         editor.putString("timeSwitch", String.valueOf(timeSpectrum));
         editor.putString("radianSelector", String.valueOf(radianSelector));
         editor.putString("rcmdSelector", String.valueOf(minRcmdSelector));
+        editor.putString("minRcmd", String.valueOf(minRcmd));
+        editor.putString("radian", String.valueOf(radian));
         editor.apply();
     }
 
@@ -1083,6 +1087,7 @@ public class MainActivity extends AppCompatActivity
             else {
                 try {
                     bitmap = new HttpImageDownTask().execute(values.filename).get();
+
 
                 }catch(Exception e) {
                     e.printStackTrace();
